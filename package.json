@@ -18,7 +18,7 @@
       "output": "dist_electron"
     },
     "win": {
-      "icon": "./resources/icon.ico",
+      "icon": "./assets/icon/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -39,7 +39,7 @@
       "!**/node_modules/**/*"
     ],
     "extraResources": [
-      "resources"
+      "asserts"
     ],
     "extraFiles": [
       {
@@ -51,9 +51,11 @@
   },
   "devDependencies": {
     "copy-webpack-plugin": "^12.0.2",
+    "css-loader": "^6.9.1",
     "electron": "28.2.0",
     "electron-builder": "^24.9.1",
     "scichart": "^3.2.555",
+    "style-loader": "^3.3.4",
     "webpack": "^5.90.0",
     "webpack-cli": "^5.1.4"
   }
