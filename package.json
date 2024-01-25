@@ -1,0 +1,60 @@
+{
+  "name": "electron-transcom",
+  "version": "1.0.0",
+  "description": "Electron app to painting with scichart",
+  "author": "kiri-to",
+  "license": "MIT",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "webpack --config webpack.config.js",
+    "pack": "webpack --config webpack.config.js && electron-builder --dir",
+    "dist": " electron-builder"
+  },
+  "build": {
+    "asar": false,
+    "productName": "Transcom",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "win": {
+      "icon": "./resources/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": "x64"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "files": [
+      "dist",
+      "!**/node_modules/**/*"
+    ],
+    "extraResources": [
+      "resources"
+    ],
+    "extraFiles": [
+      {
+        "from": "build/extra",
+        "to": "extraFiles",
+        "filter": "*.dll"
+      }
+    ]
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^12.0.2",
+    "electron": "28.2.0",
+    "electron-builder": "^24.9.1",
+    "scichart": "^3.2.555",
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
