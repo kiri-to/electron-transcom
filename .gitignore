@@ -94,3 +94,6 @@ out/
 
 #electron-builder
 dist_electron/
+
+#addons
+addons/build/
