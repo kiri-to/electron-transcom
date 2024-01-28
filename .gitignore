@@ -97,3 +97,10 @@ dist_electron/
 
 #addons
 addons/build/
+
+#dll
+dll/*
+!*.cpp
+!*.js
+!*.dll
+!makefile
