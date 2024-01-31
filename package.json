@@ -43,8 +43,8 @@
     ],
     "extraFiles": [
       {
-        "from": "dll",
-        "to": "dll",
+        "from": "dist",
+        "to": "",
         "filter": "*.dll"
       }
     ]
@@ -52,7 +52,7 @@
   "devDependencies": {
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^6.9.1",
-    "electron": "^28.2.0",
+    "electron": "20.3.8",
     "electron-builder": "^24.9.1",
     "scichart": "^3.2.555",
     "style-loader": "^3.3.4",
