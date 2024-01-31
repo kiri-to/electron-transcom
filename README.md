@@ -1,11 +1,23 @@
 # electron-transcom
 
 ## 使用方式
-
-- pnpm install   //安装项目依赖
-- pnpm build //webpack打包
-- pnpm start // run 
-- npm run distdir/dist //打包成exe/安装包
+- 安装项目依赖
+```
+ pnpm install   
+```
+- webpack打包
+```
+ pnpm build   
+```
+- 运行
+```
+ pnpm start 
+```
+- 打包成本机程序
+```
+ npm run distdir    //打包成exe
+ npm run dist       //打包成安装包
+```
 
 ## 踩坑记录
 - npm安装依赖时总出问题，pnpm很好用，安装方式: npm -g install pnpm
