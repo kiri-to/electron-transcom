@@ -1,11 +1,13 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
+
 const ffi = require('ffi-napi');
-var libfactorial = ffi.Library('./libfactorial', {
+var dll = ffi.Library(path.join(__dirname, 'libfactorial'), {
   'factorial': ['int', ['int']]
 })
-
+console.log(dll.factorial(5));
+console.log('success');
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
