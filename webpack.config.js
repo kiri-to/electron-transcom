@@ -28,7 +28,7 @@ module.exports = {
         { from: "src/index.html", to: "" },
         { from: "src/main.js", to: "" },
         { from: "src/preload.js", to: "" },
-        { from: "dll/libfactorial.dll", to: ""},
+        { from: "dll/native.dll", to: ""},
         { from: "node_modules/scichart/_wasm/scichart2d.data", to: "" },
         { from: "node_modules/scichart/_wasm/scichart2d.wasm", to: "" },
       ],
