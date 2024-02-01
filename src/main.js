@@ -3,11 +3,12 @@ const path = require('path');
 
 
 const ffi = require('ffi-napi');
-var dll = ffi.Library(path.join(__dirname, 'libfactorial'), {
+var dll = ffi.Library(path.join(__dirname, 'native'), {
   'factorial': ['int', ['int']]
 })
 console.log(dll.factorial(5));
 console.log('success');
+
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({

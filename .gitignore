@@ -102,7 +102,7 @@ addons/build/
 dll/*
 !*.cpp
 !*.js
-#!*.dll
+!*.dll
 !makefile
 
 #vscode

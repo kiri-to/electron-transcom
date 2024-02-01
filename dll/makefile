@@ -1,2 +1,2 @@
-factorial: factorial.cpp
-	cl.exe  factorial.cpp /link /dll /out:libfactorial.dll
+main: native.cpp
+	cl.exe  native.cpp /link /dll /out:native.dll
