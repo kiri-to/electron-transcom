@@ -23,9 +23,8 @@
 <!--
     npm安装依赖时总出问题，pnpm很好用，安装方式: npm -g install pnpm ，
     但当使用electron-builder打包时，ffi-napi的dev依赖模块不会被自动打包，故不推荐了,
-    且pnpm安装时不会执行模块的install，postinstall等script命令，
-    如electron时需手动执行'pnpm postinstall'来编译出dist与path.txt
 -->
+- 安装模块时会执行模块的install，postinstall等script命令，安装electron时可能执行postinstall时出错，可以去module目录动执行'npm run postinstall'来编译出dist与path.txt
 - 若安装依赖时网络有问题请换成国内源: npm config set registry https://registry.npmmirror.com
 - 使用dist命令打包时，若出现获取github包报错信息可参考：[electron-builder打包采坑问题汇总](https://zhuanlan.zhihu.com/p/248742896)
 - 安装ffi-napi时，python版本必须小于3.12
