@@ -104,6 +104,7 @@ dll/*
 !*.js
 !*.dll
 !makefile
+!liquid
 
 #vscode
 .vscode/
