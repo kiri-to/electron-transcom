@@ -1,5 +1,5 @@
 import "./index.css"
-import {
+const {
     SciChartSurface,
     NumericAxis,
     FastLineRenderableSeries,
@@ -11,8 +11,10 @@ import {
     MouseWheelZoomModifier,
     ZoomPanModifier,
     ZoomExtentsModifier
-}  from "scichart"
+}  = require('scichart')
 
+console.log(dll.factorial(5));
+console.log('success');
 const initSciChart = async () => {
 
     // Initialize SciChartSurface. Don't forget to await!

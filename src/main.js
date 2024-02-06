@@ -1,14 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
-
-const ffi = require('ffi-napi');
-var dll = ffi.Library(path.join(__dirname, 'native'), {
-  'factorial': ['int', ['int']]
-})
-console.log(dll.factorial(5));
-console.log('success');
-
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -16,18 +8,17 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      // nodeIntegration: true,
-      // contextIsolation: false,
-      // webSecurity: false
+      nodeIntegration: true,
+      contextIsolation: false,
+      webSecurity: false
     },
   });
 
   // mainWindow.loadURL('http://www.baidu.com')
-  // mainWindow.loadFile(path.join(__dirname, 'index.html')); //vite打包后文件目录不一样了
   mainWindow.loadFile('dist/index.html');
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished

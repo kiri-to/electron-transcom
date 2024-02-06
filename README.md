@@ -23,6 +23,7 @@
 <!--
     npm安装依赖时总出问题，pnpm很好用，安装方式: npm -g install pnpm ，
     但当使用electron-builder打包时，ffi-napi的dev依赖模块不会被自动打包，故不推荐了,
+    且当从cache安装时,pnpm安装模块(e.g. Electron)需手动执行postinstall等script钩子来完成安装
 -->
 - 安装模块时会执行模块的install，postinstall等script命令，安装electron时可能执行postinstall时出错，可以去module目录动执行'npm run postinstall'来编译出dist与path.txt
 - 若安装依赖时网络有问题请换成国内源: npm config set registry https://registry.npmmirror.com
