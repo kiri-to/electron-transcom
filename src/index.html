@@ -9,8 +9,27 @@
 </head>
 
 <body>
-    <div id="scichart-root" ></div>
-    <script type="module" src="renderer.js"></script>
+<div id="root">
+    <div id="nav">
+       <svg width="100%" height="100%">
+           <rect x="10" y="20" rx="10" ry="10" width="30" height="30" stroke="green" fill="transparent" stroke-width="5"/>
+       </svg>
+    </div>
+    <div id="main">
+        <div id="menu">
+            <ul>
+                <li>scichart1</li>
+                <li>scichart2</li>
+            </ul>
+        </div>
+        <div id="chartLayout">
+            <div class="scichart" id="scichart1"></div>
+            <div class="scichart" id="scichart2"></div>
+            <div class="scichart" id="scichart3"></div>
+        </div>
+    </div>
+</div>
+<script type="module" src="renderer.js"></script>
 </body>
 
 </html>

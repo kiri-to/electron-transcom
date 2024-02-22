@@ -6,6 +6,12 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#2f3241',
+      symbolColor: '#74b1be',
+      height: 20
+    },
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -14,7 +20,7 @@ const createWindow = () => {
     },
   });
 
-  // mainWindow.loadURL('http://www.baidu.com')
+  mainWindow.maximize();
   mainWindow.loadFile('dist/index.html');
 
   // Open the DevTools.
