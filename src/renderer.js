@@ -42,7 +42,7 @@ const initSciChart1 = async () => {
     //     x1[i] = i+1;
     //     y1.writeFloatLE(i+1,i*4);
     // }
-    // dll.lg(len,y1)
+    // raw.lg(len,y1)
 
 
     // let x1 = new Array();
@@ -53,7 +53,7 @@ const initSciChart1 = async () => {
     // for (var i = 0; i < 2*1024; i++) {
     //     y1.writeFloatLE(i,i*4);
     // }
-    // dll.fftShift(2048,y1)
+    // raw.fftShift(2048,y1)
 
 
     window.iq = fs.readFileSync(iqPath)
@@ -65,8 +65,8 @@ const initSciChart1 = async () => {
 
     console.log(iq.buffer)
     console.log(x1.length)
-    dll.fftShift(iq.length/2,iq)
-    console.log(dll.hello('kiri-to'));
+    raw.fftShift(iq.length/2,iq)
+    console.log(raw.hello('kiri-to'));
 
     // Create a line series with some initial data
     sciChartSurface.renderableSeries.add(new FastLineRenderableSeries(wasmContext, {
@@ -99,20 +99,23 @@ const initSciChart2 = async () => {
     sciChartSurface.yAxes.add(new NumericAxis(wasmContext,{id:'y2',axisTitle:"Q",axisAlignment: EAxisAlignment.Left}));
     sciChartSurface.layoutManager.leftOuterAxesLayoutStrategy = new LeftAlignedOuterVerticallyStackedAxisLayoutStrategy(); // 使Lines沿Y轴顺序排列
 
+    // Define iqdata
+    const count = 1e6;
+    const iqData = new Buffer.alloc(count*4);
+    const iData = new Buffer.alloc(count*2);
+    const qData = new Buffer.alloc(count*2);
+
     // Add Points
-    const count = 1_000_000;
-    let xValues = Array.from(Array(count).keys())
-    const yValues = Array.from(Array(count).keys())
+    const xValues = Array.from(Array(count).keys())
+    const yValues = Array(count).fill(0)
     const IDS = new XyDataSeries(wasmContext,{xValues,yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
     const QDS = new XyDataSeries(wasmContext,{xValues,yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
-    console.time("dataseries.appendRange(xValues,yValues) 100k points");
-
 
     // Add Lines
     const IRS = new FastLineRenderableSeries(wasmContext,{yAxisId:'y1',dataSeries:IDS ,stroke:"auto"});
     const QRS = new FastLineRenderableSeries(wasmContext, {yAxisId:'y2',dataSeries: QDS ,stroke:"auto"});
     sciChartSurface.renderableSeries.add(IRS,QRS);
-    console.timeEnd("dataseries.appendRange(xValues,yValues) 100k points");
+
     // Add some interaction modifiers to show zooming and panning
     sciChartSurface.chartModifiers.add(
         new MouseWheelZoomModifier(),
@@ -122,14 +125,33 @@ const initSciChart2 = async () => {
         new YAxisDragModifier()
     );
 
-    let tt=0;
+    //TODO 自己实现appendRange直接传递ArrayBuffer
+    //TODO C++直接拆分好I与Q
     window.updateChart2 = ()=>{
-        console.time()
-        console.log(yValues)
-        yValues.forEach((item,index,arr)=>{arr[index]=item+1000000;})
-        IDS.appendRange(xValues.slice(900000,1000000),yValues.slice(900000,1000000));
-        // setTimeout(updateChart2,10)
-        console.timeEnd()
+        //get iqdata
+        console.time('get iqdata')
+        transcom.IQ_GetData_InFreeRun(iqData,count)
+        console.timeEnd('get iqdata')
+
+        //unpack iqData
+        console.time('unpack iqData')
+        for(let i=0;i<2*count;i++){
+            iData[i] = iqData[i*2]
+            iData[i+1] = iqData[i*2+1]
+            qData[i] = iqData[i*2+2]
+            qData[i+1] = iqData[i*2+3]
+        }
+        console.timeEnd('unpack iqData')
+        
+        //update chart
+        console.time('updateChart2')
+        IDS.appendRange(xValues, Array.from(new Int16Array(iData.buffer)));
+        QDS.appendRange(xValues, Array.from(new Int16Array(qData.buffer)));
+        console.timeEnd('updateChart2')
+
+        //invoke after 10ms
+        setTimeout(updateChart2, 10);
+
     }
 }
 

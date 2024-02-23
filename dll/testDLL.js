@@ -2,29 +2,36 @@ var ffi = require('ffi-napi');
 var path = require('path')
 process.env.PATH+= path.join(__dirname, '../dist');
 
-var dll = ffi.Library('raw', {
+var raw = ffi.Library('raw', {
   'factorial': ['int', ['int']],
   'lg': ['float *', ['int', 'float *']],
   'hello':['string',['string']]
 })
 
 //test factorial
-console.log(dll.factorial(5))
+console.log(raw.factorial(5))
 
 //test hello
-console.log(dll.hello('hello worrlddd'))
+console.log(raw.hello('hello worrlddd'))
 
-// //test lg
-// var buf = new Buffer.alloc(4e3);
-// for (var i = 0; i < 1e3; i++) {
-//   buf.writeFloatLE(i+1,i*4);
-// }
-// console.log(buf)
-// console.log(dll.lg(1e3,buf))
-// console.log(buf)
+//test lg
+var buf = new Buffer.alloc(4e3);
+for (var i = 0; i < 1e3; i++) {
+  buf.writeFloatLE(i+1,i*4);
+}
+console.log(buf)
+console.log(raw.lg(1e3,buf))
+console.log(buf)
 
 const transcom = ffi.Library('TranscomApi',{
-  'API_Init':['int',[]]
+  'API_Init':['int',[]],
+  'IQ_GetData_InFreeRun':['int',['char *','double']]
 })
 
 console.log(transcom.API_Init())
+const len = 1e6;
+const iqData = new Buffer.alloc(len*4);
+do{
+  transcom.IQ_GetData_InFreeRun(iqData,len)
+  console.log(iqData)
+}while(1)
