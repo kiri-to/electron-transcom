@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
-#include "liquid/liquid.h"
+#include "../liquid/liquid.h"
 
 #define EXPORT __declspec(dllexport)
 extern "C"

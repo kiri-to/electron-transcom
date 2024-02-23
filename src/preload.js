@@ -11,7 +11,7 @@ window.fs = require('node:fs')
 //将dll路径添加到环境变量中
 process.env.PATH+= path.join(__dirname, '../dist');
 
-window.dll = ffi.Library('native', {
+window.dll = ffi.Library('raw', {
     'factorial': ['int', ['int']],
     'lg': ['float *', ['int', 'float *']],
     'hello':['string',['string']],

@@ -91,7 +91,7 @@ const initSciChart1 = async () => {
 const initSciChart2 = async () => {
 
     // Initialize SciChartSurface.
-    const {sciChartSurface, wasmContext} = await SciChartSurface.create("scichart2");
+    const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart2");
 
     // Add xAxis,yAxis
     sciChartSurface.xAxes.add(new NumericAxis(wasmContext));
@@ -101,16 +101,18 @@ const initSciChart2 = async () => {
 
     // Add Points
     const count = 1_000_000;
-    const xValues = Array.from(Array(count).keys())
+    let xValues = Array.from(Array(count).keys())
     const yValues = Array.from(Array(count).keys())
-    const IDS = new XyDataSeries(wasmContext,{xValues,yValues,dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
-    const QDS = new XyDataSeries(wasmContext,{xValues,yValues,dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
+    const IDS = new XyDataSeries(wasmContext,{xValues,yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
+    const QDS = new XyDataSeries(wasmContext,{xValues,yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
+    console.time("dataseries.appendRange(xValues,yValues) 100k points");
+
 
     // Add Lines
     const IRS = new FastLineRenderableSeries(wasmContext,{yAxisId:'y1',dataSeries:IDS ,stroke:"auto"});
     const QRS = new FastLineRenderableSeries(wasmContext, {yAxisId:'y2',dataSeries: QDS ,stroke:"auto"});
     sciChartSurface.renderableSeries.add(IRS,QRS);
-
+    console.timeEnd("dataseries.appendRange(xValues,yValues) 100k points");
     // Add some interaction modifiers to show zooming and panning
     sciChartSurface.chartModifiers.add(
         new MouseWheelZoomModifier(),
@@ -122,10 +124,12 @@ const initSciChart2 = async () => {
 
     let tt=0;
     window.updateChart2 = ()=>{
-        // yValues.forEach((y)=>{y+=1000});
-
-        IDS.append(0,++tt);
-        setTimeout(updateChart2,1000)
+        console.time()
+        console.log(yValues)
+        yValues.forEach((item,index,arr)=>{arr[index]=item+1000000;})
+        IDS.appendRange(xValues.slice(900000,1000000),yValues.slice(900000,1000000));
+        // setTimeout(updateChart2,10)
+        console.timeEnd()
     }
 }
 
@@ -171,5 +175,5 @@ async function initSciChart3() {
 }
 
 initSciChart1();
-initSciChart2()//.then(()=>{updateChart2()});
+initSciChart2().then(()=>{updateChart2()});
 initSciChart3();

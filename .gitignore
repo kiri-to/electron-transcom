@@ -99,12 +99,9 @@ dist_electron/
 addons/build/
 
 #dll
-dll/*
-!*.cpp
-!*.js
-!*.dll
-!makefile
-!liquid
+dll/**/*.obj
+dll/**/*.exp
+dll/raw/*.lib
 
 #vscode
 .vscode/
