@@ -20,8 +20,8 @@ const createWindow = () => {
     },
   });
 
-  mainWindow.maximize();
   mainWindow.loadFile('dist/index.html');
+  mainWindow.maximize();
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();

@@ -89,7 +89,7 @@ const initSciChart1 = async () => {
 };
 
 const initSciChart2 = async () => {
-
+    
     // Initialize SciChartSurface.
     const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart2");
 
@@ -153,49 +153,93 @@ const initSciChart2 = async () => {
         setTimeout(updateChart2, 10);
 
     }
+
+    const worker = new Worker("worker.js",{name:'chart2'});
+    worker.onmessage = (e) => {
+        // console.timeEnd('unpack iqData')
+
+        // //update chart
+        // console.time('updateChart2')
+        IDS.appendRange(xValues, Array.from(new Int16Array(e.data[1])));
+        QDS.appendRange(xValues, Array.from(new Int16Array(e.data[2])));
+        // console.timeEnd('updateChart2')
+        
+        updateChart2ByWorkerSecond(e.data[0],e.data[1],e.data[2])
+    }
+
+    window.updateChart2ByWorker = ()=>{
+        //get iqdata
+        transcom.IQ_GetData_InFreeRun(iqData,count)
+
+        //unpack iqData
+        console.time('post without clone')
+        worker.postMessage([iqData.buffer,iData.buffer,qData.buffer],[iqData.buffer,iData.buffer,qData.buffer])
+        console.timeEnd('post without clone')
+    }
+
+    const updateChart2ByWorkerSecond = (iqData,iData,qData)=>{
+        //get iqdata
+        // console.time('get iqData')
+        transcom.IQ_GetData_InFreeRun(Buffer.from(iqData),count)
+        // console.timeEnd('get iqData')
+
+        // console.time('unpack iqData')
+        worker.postMessage([iqData,iData,qData],[iqData,iData,qData])
+    }
 }
 
-async function initSciChart3() {
-    const {sciChartSurface, wasmContext} = await SciChartSurface.create("scichart3");
-    // Create an X,Y Axis and add to the chart
-    const xAxis = new NumericAxis(wasmContext);
-    const yAxis = new NumericAxis(wasmContext);
-    sciChartSurface.xAxes.add(xAxis);
-    sciChartSurface.yAxes.add(yAxis);
-    // Create 5 dataseries, each with 10k points
-    for (let seriesIndex = 0; seriesIndex < 5; seriesIndex++) {
-        const xyDataSeries = new XyDataSeries(wasmContext);
-        xyDataSeries.dataSeriesName = `Series ${seriesIndex}`
-        const opacity = (1 - ((seriesIndex / 5))).toFixed(2);
-        // Populate with some data
-        for(let i = 0; i < 10000; i++) {
-            xyDataSeries.append(i, Math.sin(i* 0.01) * Math.exp(i*(0.00001*(seriesIndex*10+1))));
+const initSciChart3 = async () => {
+
+    // Initialize SciChartSurface.
+    const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart3");
+
+    // Add xAxis,yAxis
+    sciChartSurface.xAxes.add(new NumericAxis(wasmContext));
+    sciChartSurface.yAxes.add(new NumericAxis(wasmContext));
+
+    // Define spectrum
+    const count = 1024;
+    const spectrum = Buffer.alloc(count*4);
+
+    // New DS
+    const xValues = Array.from(Array(count).keys());
+    const yValues = Array(count).fill(0);
+    const ds = new XyDataSeries(wasmContext,{xValues,yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
+
+    // Add LineSeries to the chart.
+    sciChartSurface.renderableSeries.add(new FastLineRenderableSeries(wasmContext, { dataSeries: ds }));
+
+    // Add some interaction modifiers to show zooming and panning
+    sciChartSurface.chartModifiers.add(
+        new MouseWheelZoomModifier(),
+        new ZoomExtentsModifier(),
+        new RubberBandXyZoomModifier(),
+    );
+
+    window.updateChart3 = ()=>{
+        // console.time('updateChart3')
+        //update spectrum data
+        transcom.Spectrum_GetData(spectrum);
+        
+        // 20* log
+        for(let i=0;i<count;i++){
+            yValues[i] = 20*Math.log(spectrum.readFloatLE(i*4))
         }
-        // Add and create a line series with this data to the chart
-        // Create a line series
-        const lineSeries = new FastLineRenderableSeries(wasmContext, {
-            dataSeries: xyDataSeries,
-            stroke: `rgba(176,196,222,${opacity})`,
-            strokeThickness:2
-        });
-        sciChartSurface.renderableSeries.add(lineSeries);
 
-        sciChartSurface.chartModifiers.add(new LegendModifier({showCheckboxes: true}));
 
-        const cursorModifier = new CursorModifier();
-        cursorModifier.axisLabelsFill = "#FFFFFF";
-        cursorModifier.axisLabelsStroke = "#00FF00";
-        sciChartSurface.chartModifiers.add(cursorModifier);
+        //update chart3
+        ds.appendRange(xValues,yValues)
 
-        const tooltipModifier = new RolloverModifier(wasmContext);
-        sciChartSurface.chartModifiers.add(tooltipModifier);
-
-        // Add a drag modifier for Y Axis
-        sciChartSurface.chartModifiers.add(new YAxisDragModifier());
-        sciChartSurface.chartModifiers.add(new XAxisDragModifier());
+        //invoke after 2ms
+        setTimeout(updateChart3,2);
+        // console.timeEnd('updateChart3')
     }
 }
 
 initSciChart1();
-initSciChart2().then(()=>{updateChart2()});
-initSciChart3();
+initSciChart2().then(()=>{updateChart2ByWorker()});
+initSciChart3().then(()=>{updateChart3()});
+
+console.log('read forever start')
+raw.readSpectrumForever();
+console.log('read forever end')

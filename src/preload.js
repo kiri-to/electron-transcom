@@ -16,19 +16,21 @@ window.raw = ffi.Library('raw', {
     'lg': ['float *', ['int', 'float *']],
     'hello':['string',['string']],
     'fftShift':['bool',['int','short*']],
-    'fftiqShift':['bool',['int','short*','short*']]
+    'fftiqShift':['bool',['int','short*','short*']],
+    'readSpectrumForever':['void',[]]
 })
 
 //加载TranscomApi
 window.transcom = ffi.Library('TranscomApi', {
-    'API_Init':['int',[]],
-    'IQ_GetData_InFreeRun':['int',['char *','double']]
+    'Device_Init':['int',[]],
+    'IQ_GetData_InFreeRun':['int',['char *','double']],
+    'Spectrum_GetData':['int',['char *']]
 })
 
 //Open Device
-console.time('API_Init')
-if(transcom.API_Init()==1)
-    console.log('API_Init success');
+console.time('Device_Init')
+if(transcom.Device_Init()==1)
+    console.log('Device_Init success');
 else
-    console.log('API_Init failed');
-console.timeEnd('API_Init')
+    console.log('Device_Init failed');
+console.timeEnd('Device_Init')

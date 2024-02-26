@@ -1,6 +1,9 @@
 #include <iostream>
 #include <cmath>
 #include "../liquid/liquid.h"
+#include "../Transcom/CInterface.h"
+#include <windows.h>
+#include <thread>
 
 #define EXPORT __declspec(dllexport)
 extern "C"
@@ -82,4 +85,48 @@ EXPORT bool fftiqShift(int nums, short *i,short  *q) {
     return true;
 }
 
+EXPORT void readSpectrumForever(){
+    unsigned char *t = new unsigned char[4096];
+    std::thread t1([t](){
+        while (1) {
+            Spectrum_GetData(t);
+        }
+    });
+    t1.detach();
+    return;
+}
+
+
+bool WINAPI DllMain(
+	_In_ HANDLE hInstance,
+	_In_ ULONG  fdwReason,
+	LPVOID Reserved
+)
+{
+	printf("%p\r\n", hInstance);
+	switch (fdwReason)
+	{
+	case DLL_PROCESS_DETACH:  //0
+	{
+        std::cout <<"raw: DLL_PROCESS_DETACH" << std::endl;
+		break;
+	}
+	case DLL_PROCESS_ATTACH: //1
+	{
+		std::cout << "raw: DLL_PROCESS_ATTACH" << std::endl;
+		break;
+	}
+	case DLL_THREAD_ATTACH: //2
+	{
+		std::cout << "raw: DLL_THREAD_ATTACH" << std::endl;
+		break;
+	}
+	case DLL_THREAD_DETACH: //3
+	{
+		std::cout << "raw: DLL_THREAD_DETACH" << std::endl;
+		break;
+	}
+	}
+	return TRUE;
+}
 }

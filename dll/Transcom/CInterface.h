@@ -1,23 +1,23 @@
 #pragma once
-#include "PCIEApi.h"
 #include <string>
 #include <iostream>
 #include <vector>
-#include "XillyFile.h"
 #include "Enum.h"
 
 //供C C#调用 函数外部可用
 #define TRABSCOMAPITOC extern "C" __declspec(dllexport)
-TRABSCOMAPITOC int API_Init();
+TRABSCOMAPITOC int Device_Init();
 
-TRABSCOMAPITOC int Spectrum_GetData_InFreeRun(unsigned char* res, int TracePoints);
+TRABSCOMAPITOC int Device_DeInit();
+
+TRABSCOMAPITOC int Spectrum_GetData_InFreeRun(unsigned char* res);
 
 //TRABSCOMAPITOC bool open_file(int value);
 //TRABSCOMAPITOC void Close_file();
 
 TRABSCOMAPITOC int Device_OpenDevice();
 TRABSCOMAPITOC int Device_ClosenDevice();
-TRABSCOMAPITOC int CenterFreq_Set(double centerfreq);
+TRABSCOMAPITOC int CenterFreq_Set(double centerfreq, double reflevel);
 TRABSCOMAPITOC int Span_Rbw_Set(double span, int Rbw, bool isTriggerMode);
 
 TRABSCOMAPITOC int RF_LNA_ON();
@@ -77,7 +77,7 @@ TRABSCOMAPITOC int Logic_Set_Offset(float Offset);
 TRABSCOMAPITOC int Logic_Set_ZoomFactor(float ZoomFactor);
 TRABSCOMAPITOC int Logic_Set_ValueScale(float ValueScale);
 
-TRABSCOMAPITOC int Spectrum_GetData(unsigned char* SpectrumData, int TracePoints);
+TRABSCOMAPITOC int Spectrum_GetData(unsigned char* SpectrumData);
 TRABSCOMAPITOC int Spectrum_SetTraceDetector(DetectorType  Detector);
 TRABSCOMAPITOC int Spectrum_SetRefLevel(double reflevel);
 TRABSCOMAPITOC int Spectrum_SetAttenuation(double att);
@@ -116,33 +116,3 @@ TRABSCOMAPITOC int NVMe_ClearStreamData();
 TRABSCOMAPITOC int NVMe_ReadIQData(unsigned int selectnum, double selecttime, double DisplayTimeOfData, unsigned char* IData, unsigned char* QData);
 TRABSCOMAPITOC unsigned int NVMe_GetNeedBlock(double DisplayTimeOfData, double span);
 TRABSCOMAPITOC int NVMe_ResetStream();
-
-TRABSCOMAPITOC class Nvme {
-public:
-	std::vector<NvmeTable> tables;
-
-	/**
-	* @brief	获取流盘记录列表
-	*/
-	std::vector<NvmeTable> getTable();
-
-	/**
-	* @brief			读取流盘记录中第n条数据
-	* @param n	    	待读取第n条数据,从0开始
-	*/
-	std::vector<std::vector<uint8_t> > readIQData(int n);
-
-	/**
-	* @brief		 开始流盘
-	* @param name    流盘数据名称
-	* @param time    流盘持续时间,单位s
-	* @param cf		 中心频率
-	* @param span	 带宽
-	*/
-	void write(std::wstring name, double time, uint64_t cf, double span);
-
-	/**
-	* @brief	清除所有流盘记录
-	*/
-	void cleanAll();
-};

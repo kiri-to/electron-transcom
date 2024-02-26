@@ -28,6 +28,7 @@ module.exports = {
         { from: "src/index.html", to: "" },
         { from: "src/main.js", to: "" },
         { from: "src/preload.js", to: "" },
+        { from: "src/worker.js", to: "" },
         { from: "dll/raw/raw.dll", to: ""},
         { from: "dll/liquid/liquid.dll", to: ""},
         { from: "dll/liquid/libfftw3f-3.dll", to: ""},

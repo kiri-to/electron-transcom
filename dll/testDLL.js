@@ -24,11 +24,11 @@ console.log(raw.lg(1e3,buf))
 console.log(buf)
 
 const transcom = ffi.Library('TranscomApi',{
-  'API_Init':['int',[]],
+  'Device_Init':['int',[]],
   'IQ_GetData_InFreeRun':['int',['char *','double']]
 })
 
-console.log(transcom.API_Init())
+console.log(transcom.Device_Init())
 const len = 1e6;
 const iqData = new Buffer.alloc(len*4);
 do{
