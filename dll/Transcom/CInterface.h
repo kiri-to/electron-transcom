@@ -85,7 +85,7 @@ TRABSCOMAPITOC int Spectrum_SetSpanAndRbw(double span, int Rbw, bool isTriggerMo
 TRABSCOMAPITOC int Spectrum_SetSweepTime(double sweeptime);
 TRABSCOMAPITOC double Spectrum_GetSweepTime();
 
-TRABSCOMAPITOC int Persistence_GetData(unsigned char* PersistenceData, int TracePoints);
+TRABSCOMAPITOC int Persistence_GetData(unsigned char* PersistenceData);
 TRABSCOMAPITOC int Persistence_SetPersistenceNum_SetGraunityNum(uint32_t PersistenceNum, uint32_t GraunityNum);
 TRABSCOMAPITOC int Persistence_SetOffset(float offset);
 TRABSCOMAPITOC int Persistence_SetZoomFactor(float ZoomFactor);

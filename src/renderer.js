@@ -4,6 +4,9 @@ const {
     NumericAxis,
     FastLineRenderableSeries,
     XyDataSeries,
+    HeatmapColorMap,
+    UniformHeatmapDataSeries,
+    UniformHeatmapRenderableSeries,
     EllipsePointMarker,
     SweepAnimation,
     SciChartJsNavyTheme,
@@ -199,7 +202,7 @@ const initSciChart3 = async () => {
 
     // Define spectrum
     const count = 1024;
-    const spectrum = Buffer.alloc(count*4);
+    let spectrum = Buffer.alloc(count*4);
 
     // New DS
     const xValues = Array.from(Array(count).keys());
@@ -226,7 +229,6 @@ const initSciChart3 = async () => {
             yValues[i] = 20*Math.log(spectrum.readFloatLE(i*4))
         }
 
-
         //update chart3
         ds.appendRange(xValues,yValues)
 
@@ -234,12 +236,87 @@ const initSciChart3 = async () => {
         setTimeout(updateChart3,2);
         // console.timeEnd('updateChart3')
     }
+
+    window.updateChart3ByWorker = ()=>{
+        let worker = new Worker('worker.js',{name:'chart3'});
+        worker.onmessage = (e)=>{
+            let t =new Float32Array(e.data);
+            for(let i=0;i<count;i++){
+                yValues[i] = 20*Math.log(t[i])
+            }
+            ds.appendRange(xValues,yValues)
+        }
+        // setTimeout(()=>{worker.terminate()},10000)
+    }
 }
 
-initSciChart1();
-initSciChart2().then(()=>{updateChart2ByWorker()});
-initSciChart3().then(()=>{updateChart3()});
+const initSciChart4 = async () => {
+    // Initialize SciChartSurface.
+    const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart4");
 
-console.log('read forever start')
-raw.readSpectrumForever();
-console.log('read forever end')
+    // Add xAxis,yAxis
+    sciChartSurface.xAxes.add(new NumericAxis(wasmContext));
+    sciChartSurface.yAxes.add(new NumericAxis(wasmContext));
+
+    // Add DS
+    const WIDTH = 1024;
+    const HEIGHT = 512;
+    const zValue = Array(HEIGHT).fill(Array(WIDTH).fill(0));
+    const heatmapDataSeries = new UniformHeatmapDataSeries(wasmContext, {
+        xStart: 0,
+        xStep: 1,
+        yStart: 0,
+        yStep: 1,
+        zValues: zValue
+    });
+   
+    // Create a Heatmap RenderableSeries with the color map. ColorMap.minimum/maximum defines the values in
+    // HeatmapDataSeries which correspond to gradient stops at 0..1
+    const heatmapSeries = new UniformHeatmapRenderableSeries(wasmContext, {
+        dataSeries: heatmapDataSeries,
+        useLinearTextureFiltering: false,
+        colorMap: new HeatmapColorMap({
+            minimum: 0,
+            maximum: 1,
+            gradientStops: [
+               { offset:"0", color:"black" },
+            //    { offset:"0.0001", color:"DarkBlue" },
+               { offset:"0.2", color:"CornflowerBlue" },
+               { offset:"0.45", color:"DarkGreen" },
+               { offset:"0.5", color:"Chartreuse" },
+               { offset:"0.7", color:"Yellow" },
+               { offset:"0.9", color:"Red" }
+            ]
+        })
+    });
+
+    // Add Line
+    sciChartSurface.renderableSeries.add(heatmapSeries);
+
+    sciChartSurface.chartModifiers.add(
+        new MouseWheelZoomModifier(),
+        new ZoomPanModifier(),
+        new ZoomExtentsModifier()
+    );
+
+    window.updateChart4ByWorker = ()=>{
+        const worker = new Worker('worker.js',{name:'chart4'});
+        worker.onmessage = (e)=>{
+            console.log(e.data)
+            heatmapDataSeries.setZValues(e.data)
+            worker.postMessage('continue')
+        }
+        worker.postMessage('start')
+    }
+}
+
+// initSciChart1();
+initSciChart2().then(()=>{
+    // updateChart2();
+    updateChart2ByWorker();
+});
+initSciChart3().then(()=>{
+    // updateChart3(); raw.readSpectrumForever();
+    updateChart3ByWorker();
+});
+initSciChart4().then(()=>{updateChart4ByWorker()})

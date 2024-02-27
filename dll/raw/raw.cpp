@@ -86,14 +86,13 @@ EXPORT bool fftiqShift(int nums, short *i,short  *q) {
 }
 
 EXPORT void readSpectrumForever(){
-    unsigned char *t = new unsigned char[4096];
-    std::thread t1([t](){
+    std::thread thread1([](){
+        unsigned char *t = new unsigned char[4096];
         while (1) {
             Spectrum_GetData(t);
         }
     });
-    t1.detach();
-    return;
+    thread1.detach();
 }
 
 

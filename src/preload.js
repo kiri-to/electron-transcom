@@ -24,7 +24,8 @@ window.raw = ffi.Library('raw', {
 window.transcom = ffi.Library('TranscomApi', {
     'Device_Init':['int',[]],
     'IQ_GetData_InFreeRun':['int',['char *','double']],
-    'Spectrum_GetData':['int',['char *']]
+    'Spectrum_GetData':['int',['char *']],
+    'Persistence_GetData':['int',['char *']]
 })
 
 //Open Device
