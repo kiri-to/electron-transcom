@@ -279,13 +279,17 @@ const initSciChart4 = async () => {
             minimum: 0,
             maximum: 1,
             gradientStops: [
-               { offset:"0", color:"black" },
-            //    { offset:"0.0001", color:"DarkBlue" },
-               { offset:"0.2", color:"CornflowerBlue" },
-               { offset:"0.45", color:"DarkGreen" },
-               { offset:"0.5", color:"Chartreuse" },
-               { offset:"0.7", color:"Yellow" },
-               { offset:"0.9", color:"Red" }
+                { offset : 0, color: "Transparent"},
+                { offset : 0.1, color : "#0000FF"},
+                { offset : 0.2, color : "#0D8FBF"},
+                { offset : 0.3, color : "#00FFFF"},
+                { offset : 0.4, color : "#70AA39"},
+                { offset : 0.5, color : "#00FF00"},
+                { offset : 0.6, color : "#FFFF00"},
+                { offset : 0.7, color : "#FF8000"},
+                { offset : 0.8, color : "#FF4500"},
+                { offset : 0.9, color : "#FF0000"},
+                { offset : 1, color :   "#FF0000"},
             ]
         })
     });
@@ -313,10 +317,10 @@ const initSciChart4 = async () => {
 // initSciChart1();
 initSciChart2().then(()=>{
     // updateChart2();
-    updateChart2ByWorker();
+    // updateChart2ByWorker();
 });
 initSciChart3().then(()=>{
     // updateChart3(); raw.readSpectrumForever();
-    updateChart3ByWorker();
+    // updateChart3ByWorker();
 });
-initSciChart4().then(()=>{updateChart4ByWorker()})
+initSciChart4()//.then(()=>{updateChart4ByWorker()})

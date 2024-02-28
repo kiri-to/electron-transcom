@@ -29,9 +29,11 @@ window.transcom = ffi.Library('TranscomApi', {
 })
 
 //Open Device
+setTimeout(()=>{
 console.time('Device_Init')
 if(transcom.Device_Init()==1)
     console.log('Device_Init success');
 else
     console.log('Device_Init failed');
 console.timeEnd('Device_Init')
+},1e3)

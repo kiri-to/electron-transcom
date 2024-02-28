@@ -27,6 +27,7 @@
       ]
     },
     "nsis": {
+      "include":"installer.nsh",
       "oneClick": false,
       "perMachine": true,
       "allowElevation": true,
@@ -40,13 +41,6 @@
     ],
     "extraResources": [
       "asserts"
-    ],
-    "extraFiles": [
-      {
-        "from": "dist",
-        "to": "",
-        "filter": "*.dll"
-      }
     ]
   },
   "devDependencies": {
