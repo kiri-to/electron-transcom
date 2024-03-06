@@ -25,9 +25,46 @@ const {
     EAxisAlignment
 }  = require('scichart')
 
-const initSciChart1 = async () => {
+function initNav(){
+    let div1 = document.createElement("div");
+    div1.innerHTML = `<svg width="100%" height="100%"><rect x="7" y="20" rx="10" ry="10" width="30" height="30" stroke="green" fill="transparent" stroke-width="5"/></svg>`
+    document.querySelector("#nav").appendChild(div1);
 
+    let div2 = document.createElement("div");
+    div2.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-broadcast" viewBox="0 0 16 16"><path d="M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707m2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 1 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708m5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708m2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM10 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0"/></svg>`
+    div2.style.paddingLeft = "7px";
+    document.querySelector("#nav").appendChild(div2);
+
+    div1.onclick=()=>{initMenu1()}
+    div2.onclick=()=>{initMenu2()}
+}
+initNav();
+
+function addChartElement(chartName){
+    const div = document.createElement("div");
+    div.id = chartName;
+    div.class = "scichart";
+    document.getElementById("chartLayout").appendChild(div);
+}
+
+//-------------------------------------------------------- Menu 1  ------------------------------------------------------------//
+function initMenu1(){
+    const ul = document.createElement("ul");
+    document.querySelector("#menu").innerHTML='';
+    document.querySelector("#menu").appendChild(ul);
+    
+    for(let i=1;i<=4;i++){
+        let li = document.createElement("li");
+        li.innerHTML = "scichart"+i; 
+        li.onclick=()=>{eval("switchSciChart"+i+"()")};
+        ul.appendChild(li);
+    }
+}
+initMenu1();  //manual invoke for default
+
+const initSciChart1 = async () => {
     // Initialize SciChartSurface. Don't forget to await!
+    addChartElement("scichart1");
     const { sciChartSurface, wasmContext } = await SciChartSurface.create("scichart1", {
         title: "Test Data",
         titleStyle: { fontSize: 22 }
@@ -92,8 +129,8 @@ const initSciChart1 = async () => {
 };
 
 const initSciChart2 = async () => {
-    
     // Initialize SciChartSurface.
+    addChartElement("scichart2");
     const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart2");
 
     // Add xAxis,yAxis
@@ -156,7 +193,8 @@ const initSciChart2 = async () => {
         setTimeout(updateChart2, 10);
 
     }
-
+    
+    //TODO convert worker to worker_threadd module
     const worker = new Worker("worker.js",{name:'chart2'});
     worker.onmessage = (e) => {
         // console.timeEnd('unpack iqData')
@@ -192,8 +230,8 @@ const initSciChart2 = async () => {
 }
 
 const initSciChart3 = async () => {
-
     // Initialize SciChartSurface.
+    addChartElement("scichart3")
     const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart3");
 
     // Add xAxis,yAxis
@@ -252,6 +290,7 @@ const initSciChart3 = async () => {
 
 const initSciChart4 = async () => {
     // Initialize SciChartSurface.
+    addChartElement("scichart4");
     const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart4");
 
     // Add xAxis,yAxis
@@ -314,13 +353,137 @@ const initSciChart4 = async () => {
     }
 }
 
-// initSciChart1();
-initSciChart2().then(()=>{
-    // updateChart2();
-    // updateChart2ByWorker();
-});
-initSciChart3().then(()=>{
-    // updateChart3(); raw.readSpectrumForever();
-    // updateChart3ByWorker();
-});
-initSciChart4()//.then(()=>{updateChart4ByWorker()})
+function switchSciChart1(){
+    if(document.querySelector("#scichart1")){
+        console.log("delete SciChart1");
+        document.querySelector("#scichart1").remove();
+    }else{
+        console.log("append SciChart1");
+        initSciChart1();
+    }
+}
+
+function switchSciChart2(){
+    if(document.querySelector("#scichart2")){
+        console.log("delete SciChart2");
+        document.querySelector("#scichart2").remove();
+    }else{
+        console.log("append SciChart2");
+        initSciChart2().then(()=>{
+            // updateChart2();
+            // updateChart2ByWorker();
+        });
+    }
+}
+
+function switchSciChart3(){
+    if(document.querySelector("#scichart3")){
+        console.log("delete SciChart3");
+        document.querySelector("#scichart3").remove();
+    }else{
+        console.log("append SciChart3");
+        initSciChart3().then(()=>{
+            // updateChart3(); raw.readSpectrumForever();
+            updateChart3ByWorker();
+        });
+    }
+}
+
+function switchSciChart4(){
+    if(document.querySelector("#scichart4")){
+        console.log("delete SciChart4");
+        document.querySelector("#scichart4").remove();
+    }else{
+        console.log("append SciChart4");
+        initSciChart4()//.then(()=>{updateChart4ByWorker()})
+    }
+}
+
+//      manual invoke for default     //
+// document.querySelector("#menu>ul>li:nth-child(1)").click();
+document.querySelector("#menu>ul>li:nth-child(2)").click();     
+document.querySelector("#menu>ul>li:nth-child(3)").click();
+// document.querySelector("#menu>ul>li:nth-child(4)").click();
+
+//-------------------------------------------------------- Menu 2  ------------------------------------------------------------//
+function initMenu2(){
+    const ul = document.createElement("ul");
+    document.querySelector("#menu").innerHTML='';
+    document.querySelector("#menu").appendChild(ul);
+    
+    let li = document.createElement("li");
+    li.innerHTML = "Mask Trigger"; 
+    li.onclick=()=>{switchSciChart2_1()};
+    ul.appendChild(li);
+}
+
+const initSciChart2_1 = async () => {
+    // Initialize SciChartSurface.
+    addChartElement("scichart2_1")
+    const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart2_1");
+
+    // Add xAxis,yAxis
+    sciChartSurface.xAxes.add(new NumericAxis(wasmContext));
+    sciChartSurface.yAxes.add(new NumericAxis(wasmContext));
+
+    // Define spectrum
+    const count = 1024;
+    let spectrum = Buffer.alloc(count*4);
+
+    // New DS
+    const xValues = Array.from(Array(count).keys());
+    const yValues = Array(count).fill(0);
+    const ds = new XyDataSeries(wasmContext,{xValues,yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
+
+    // Add LineSeries to the chart.
+    sciChartSurface.renderableSeries.add(new FastLineRenderableSeries(wasmContext, { dataSeries: ds }));
+
+    // Add some interaction modifiers to show zooming and panning
+    sciChartSurface.chartModifiers.add(
+        new MouseWheelZoomModifier(),
+        new ZoomExtentsModifier(),
+        new RubberBandXyZoomModifier(),
+    );
+
+    window.updateChart2_1 = ()=>{
+        // console.time('updateChart3')
+        //update spectrum data
+        transcom.Spectrum_GetData(spectrum);
+        
+        // 20* log
+        for(let i=0;i<count;i++){
+            yValues[i] = 20*Math.log(spectrum.readFloatLE(i*4))
+        }
+
+        //update chart3
+        ds.appendRange(xValues,yValues)
+
+        //invoke after 2ms
+        setTimeout(updateChart2_1,2);
+        // console.timeEnd('updateChart3')
+    }
+
+    window.updateChart2_1ByWorker = ()=>{
+        let worker = new Worker('worker.js',{name:'chart3'});
+        worker.onmessage = (e)=>{
+            let t =new Float32Array(e.data);
+            for(let i=0;i<count;i++){
+                yValues[i] = 20*Math.log(t[i])
+            }
+            ds.appendRange(xValues,yValues)
+        }
+    }
+}
+
+function switchSciChart2_1(){
+    if(document.querySelector("#scichart2_1")){
+        console.log("delete SciChart2_1");
+        document.querySelector("#scichart2_1").remove();
+    }else{
+        console.log("append SciChart2_1");
+        initSciChart2_1().then(()=>{
+            // updateChart3(); raw.readSpectrumForever();
+            updateChart2_1ByWorker();
+        });
+    }
+}
