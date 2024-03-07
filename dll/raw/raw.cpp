@@ -4,6 +4,7 @@
 #include "../Transcom/CInterface.h"
 #include <windows.h>
 #include <thread>
+#include <winnt.h>
 
 #define EXPORT __declspec(dllexport)
 extern "C"
@@ -93,6 +94,12 @@ EXPORT void readSpectrumForever(){
         }
     });
     thread1.detach();
+}
+
+EXPORT void getFpgaInterrupt(char* data){
+    DWORD t;
+    HANDLE device =  CreateFileA(R"(\\.\xillyusb_00_intr)", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_ALWAYS, NULL, NULL);
+    ReadFile(device, data, 4, &t,NULL);
 }
 
 

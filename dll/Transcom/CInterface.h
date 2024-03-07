@@ -4,7 +4,7 @@
 #include <vector>
 #include "Enum.h"
 
-//渚汣 C#璋冪敤 鍑芥暟澶栭儴鍙敤
+//供C C#调用 函数外部可用
 #define TRABSCOMAPITOC extern "C" __declspec(dllexport)
 TRABSCOMAPITOC int Device_Init();
 
@@ -49,7 +49,7 @@ TRABSCOMAPITOC int ADC_FirFactor(unsigned int* factor);
 TRABSCOMAPITOC int ADC_ConfigNCO(double centerfreq, int value);
 TRABSCOMAPITOC int ADC_DMA_MM2S();
 TRABSCOMAPITOC int ADC_ControlShift(int value);
-TRABSCOMAPITOC int ADC_Deci(int DecimateFactor);
+TRABSCOMAPITOC int ADC_Deci(int DecimateFactor, bool isTriggerMode);
 TRABSCOMAPITOC int ADC_InitDeci(int DecimateFactor);
 TRABSCOMAPITOC int AD9695_Mode();
 TRABSCOMAPITOC int AD9695_Status();
@@ -68,7 +68,7 @@ TRABSCOMAPITOC int DDR1_GetStatus();
 
 TRABSCOMAPITOC int Logic_Set_win_lsb(unsigned int win_lsb);
 TRABSCOMAPITOC int Logic_Set_trace_num(unsigned int trace_num);
-TRABSCOMAPITOC int Logic_Set_RBW(int RBW);
+TRABSCOMAPITOC int Logic_Set_RBW(int RBW, bool isTriggerMode);
 TRABSCOMAPITOC int Logic_Set_Detector(DetectorType   Detector);
 TRABSCOMAPITOC int Logic_Set_SweepTime(double SweepTime);
 TRABSCOMAPITOC int Logic_Set_PersistenceNum(unsigned int PersistenceNum);
@@ -103,6 +103,7 @@ TRABSCOMAPITOC int RunningMode_SetTriggerLevel(int TriggerPowerLevel, double cen
 TRABSCOMAPITOC int RunningMode_SetTriggerAMP(int AMP, double centerFreq);
 TRABSCOMAPITOC int RunningMode_SetTriggerPostTime(unsigned  int posttime,double ClockSample);
 TRABSCOMAPITOC int RunningMode_SetPulseNum(unsigned  int PulseNum);
+TRABSCOMAPITOC int RunningMode_SetFrequencyMask(bool UpperMaskIsChecked, double span, double rbw, float myArray[1024], int EnterLeaveMode);
 
 TRABSCOMAPITOC int NVMe_ReadFileTable(unsigned char* res);
 TRABSCOMAPITOC int NVMe_WriteStreamTable(unsigned int StratBlock, unsigned int Needblock);
@@ -113,6 +114,6 @@ TRABSCOMAPITOC int NVMe_ReadQData(unsigned int startblock, double span, double s
 TRABSCOMAPITOC int NVMe_TriggerOperation_GetIQData_1(unsigned char* IQPosition);
 TRABSCOMAPITOC int NVMe_TriggerOperation_GetIQData_2(unsigned char* IQPosition);
 TRABSCOMAPITOC int NVMe_ClearStreamData();
-TRABSCOMAPITOC int NVMe_ReadIQData(unsigned int selectnum, double selecttime, double DisplayTimeOfData, unsigned char* IData, unsigned char* QData);
+TRABSCOMAPITOC int NVMe_ReadIQData(unsigned int selectnum, double selecttime, double DisplayTimeOfData, unsigned char* IQData);
 TRABSCOMAPITOC unsigned int NVMe_GetNeedBlock(double DisplayTimeOfData, double span);
 TRABSCOMAPITOC int NVMe_ResetStream();

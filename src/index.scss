@@ -1,0 +1,14 @@
+@import "bootstrap/scss/bootstrap";
+
+::-webkit-scrollbar { display: none;}
+body { font-size: 1.5em; background: #1d1d1d; color: rgba(255, 250, 250, 0.7); user-select: none;}
+#root { width: 100vw; height: 100vh;}
+#nav { position: fixed; width: 50px;}
+#main { display: flex; padding-left: 50px; }
+#menu { height: 100vh; background: rgba(0, 0, 0, 0.7); padding: 0 10px;}
+#chartLayout { width: 100%; height: 100vh; display: flex; flex-direction: column;}
+#nav>div {height: 80px;} 
+svg { cursor: pointer;}
+.row{ margin: 10px 0; }
+.btn-dark { min-width: 120px;}
+.card { background-color: transparent}

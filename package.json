@@ -27,7 +27,7 @@
       ]
     },
     "nsis": {
-      "include":"installer.nsh",
+      "include": "installer.nsh",
       "oneClick": false,
       "perMachine": true,
       "allowElevation": true,
@@ -44,10 +44,15 @@
     ]
   },
   "devDependencies": {
+    "autoprefixer": "^10.4.18",
+    "bootstrap": "^5.3.3",
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^6.9.1",
     "electron": "20.3.8",
     "electron-builder": "^24.9.1",
+    "postcss-loader": "^8.1.1",
+    "sass": "^1.71.1",
+    "sass-loader": "^14.1.1",
     "scichart": "^3.2.555",
     "style-loader": "^3.3.4",
     "webpack": "^5.90.0",

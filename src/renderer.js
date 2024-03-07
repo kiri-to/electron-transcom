@@ -1,8 +1,10 @@
-import "./index.css"
+import "./index.scss"
+const bootstrap = require("bootstrap")
 const {
     SciChartSurface,
     NumericAxis,
     FastLineRenderableSeries,
+    FastMountainRenderableSeries,
     XyDataSeries,
     HeatmapColorMap,
     UniformHeatmapDataSeries,
@@ -39,6 +41,7 @@ function initNav(){
     div2.onclick=()=>{initMenu2()}
 }
 initNav();
+const menu = document.querySelector("#menu")
 
 function addChartElement(chartName){
     const div = document.createElement("div");
@@ -49,15 +52,15 @@ function addChartElement(chartName){
 
 //-------------------------------------------------------- Menu 1  ------------------------------------------------------------//
 function initMenu1(){
-    const ul = document.createElement("ul");
-    document.querySelector("#menu").innerHTML='';
-    document.querySelector("#menu").appendChild(ul);
+    menu.innerHTML='';
     
+    let charts = ["File Data","IQ","Spectrum","Persistence"];
     for(let i=1;i<=4;i++){
-        let li = document.createElement("li");
-        li.innerHTML = "scichart"+i; 
-        li.onclick=()=>{eval("switchSciChart"+i+"()")};
-        ul.appendChild(li);
+        let row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `<button type="button" class="btn btn-dark">`+charts[i-1]+`</button>` ;
+        row.onclick=()=>{eval("switchSciChart"+i+"()")};
+        menu.appendChild(row);
     }
 }
 initMenu1();  //manual invoke for default
@@ -141,9 +144,8 @@ const initSciChart2 = async () => {
 
     // Define iqdata
     const count = 1e6;
-    const iqData = new Buffer.alloc(count*4);
-    const iData = new Buffer.alloc(count*2);
-    const qData = new Buffer.alloc(count*2);
+    const iData = new ArrayBuffer(count*2);
+    const qData = new ArrayBuffer(count*2);
 
     // Add Points
     const xValues = Array.from(Array(count).keys())
@@ -167,65 +169,18 @@ const initSciChart2 = async () => {
 
     //TODO 自己实现appendRange直接传递ArrayBuffer
     //TODO C++直接拆分好I与Q
-    window.updateChart2 = ()=>{
-        //get iqdata
-        console.time('get iqdata')
-        transcom.IQ_GetData_InFreeRun(iqData,count)
-        console.timeEnd('get iqdata')
-
-        //unpack iqData
-        console.time('unpack iqData')
-        for(let i=0;i<2*count;i++){
-            iData[i] = iqData[i*2]
-            iData[i+1] = iqData[i*2+1]
-            qData[i] = iqData[i*2+2]
-            qData[i+1] = iqData[i*2+3]
-        }
-        console.timeEnd('unpack iqData')
-        
-        //update chart
-        console.time('updateChart2')
-        IDS.appendRange(xValues, Array.from(new Int16Array(iData.buffer)));
-        QDS.appendRange(xValues, Array.from(new Int16Array(qData.buffer)));
-        console.timeEnd('updateChart2')
-
-        //invoke after 10ms
-        setTimeout(updateChart2, 10);
-
-    }
-    
-    //TODO convert worker to worker_threadd module
-    const worker = new Worker("worker.js",{name:'chart2'});
-    worker.onmessage = (e) => {
-        // console.timeEnd('unpack iqData')
-
-        // //update chart
-        // console.time('updateChart2')
-        IDS.appendRange(xValues, Array.from(new Int16Array(e.data[1])));
-        QDS.appendRange(xValues, Array.from(new Int16Array(e.data[2])));
-        // console.timeEnd('updateChart2')
-        
-        updateChart2ByWorkerSecond(e.data[0],e.data[1],e.data[2])
-    }
-
+    //TODO convert worker to worker_thread module
     window.updateChart2ByWorker = ()=>{
-        //get iqdata
-        transcom.IQ_GetData_InFreeRun(iqData,count)
+        updateChart2ByWorker.worker = new Worker("worker.js", { name: 'chart2'});
+        updateChart2ByWorker.worker.onmessage = (e) => {
+            // console.time('updateChart2')
+            IDS.appendRange(xValues, Array.from(new Int16Array(e.data[0])));
+            QDS.appendRange(xValues, Array.from(new Int16Array(e.data[1])));
+            // console.timeEnd('updateChart2')
 
-        //unpack iqData
-        console.time('post without clone')
-        worker.postMessage([iqData.buffer,iData.buffer,qData.buffer],[iqData.buffer,iData.buffer,qData.buffer])
-        console.timeEnd('post without clone')
-    }
-
-    const updateChart2ByWorkerSecond = (iqData,iData,qData)=>{
-        //get iqdata
-        // console.time('get iqData')
-        transcom.IQ_GetData_InFreeRun(Buffer.from(iqData),count)
-        // console.timeEnd('get iqData')
-
-        // console.time('unpack iqData')
-        worker.postMessage([iqData,iData,qData],[iqData,iData,qData])
+            updateChart2ByWorker.worker.postMessage([e.data[0], e.data[1]], [e.data[0], e.data[1]])
+        }
+        updateChart2ByWorker.worker.postMessage([iData,qData],[iData,qData])
     }
 }
 
@@ -264,7 +219,7 @@ const initSciChart3 = async () => {
         
         // 20* log
         for(let i=0;i<count;i++){
-            yValues[i] = 20*Math.log(spectrum.readFloatLE(i*4))
+            yValues[i] = 20*Math.log(spectrum.readUint32LE(i*4))-160.75;
         }
 
         //update chart3
@@ -278,9 +233,9 @@ const initSciChart3 = async () => {
     window.updateChart3ByWorker = ()=>{
         let worker = new Worker('worker.js',{name:'chart3'});
         worker.onmessage = (e)=>{
-            let t =new Float32Array(e.data);
+            let t =new Uint32Array(e.data);
             for(let i=0;i<count;i++){
-                yValues[i] = 20*Math.log(t[i])
+                yValues[i] = 20*Math.log(t[i])-160.75;
             }
             ds.appendRange(xValues,yValues)
         }
@@ -345,7 +300,6 @@ const initSciChart4 = async () => {
     window.updateChart4ByWorker = ()=>{
         const worker = new Worker('worker.js',{name:'chart4'});
         worker.onmessage = (e)=>{
-            console.log(e.data)
             heatmapDataSeries.setZValues(e.data)
             worker.postMessage('continue')
         }
@@ -370,8 +324,7 @@ function switchSciChart2(){
     }else{
         console.log("append SciChart2");
         initSciChart2().then(()=>{
-            // updateChart2();
-            // updateChart2ByWorker();
+            updateChart2ByWorker();
         });
     }
 }
@@ -395,26 +348,73 @@ function switchSciChart4(){
         document.querySelector("#scichart4").remove();
     }else{
         console.log("append SciChart4");
-        initSciChart4()//.then(()=>{updateChart4ByWorker()})
+        initSciChart4().then(()=>{
+            updateChart4ByWorker()
+        })
     }
 }
 
 //      manual invoke for default     //
-// document.querySelector("#menu>ul>li:nth-child(1)").click();
-document.querySelector("#menu>ul>li:nth-child(2)").click();     
-document.querySelector("#menu>ul>li:nth-child(3)").click();
-// document.querySelector("#menu>ul>li:nth-child(4)").click();
+// switchSciChart1();  
+// switchSciChart2();  
+// switchSciChart3();  
+// switchSciChart4();  
 
 //-------------------------------------------------------- Menu 2  ------------------------------------------------------------//
 function initMenu2(){
-    const ul = document.createElement("ul");
-    document.querySelector("#menu").innerHTML='';
-    document.querySelector("#menu").appendChild(ul);
-    
-    let li = document.createElement("li");
-    li.innerHTML = "Mask Trigger"; 
-    li.onclick=()=>{switchSciChart2_1()};
-    ul.appendChild(li);
+    menu.innerHTML='';
+
+    const row1 = document.createElement("div");
+    row1.className = "row";
+    row1.innerHTML = 
+        `<div id="menu2_1" class="card" style="width: 20rem;">
+            <button type="button" class="btn btn-dark" id="MaskTrigger">Mask Trigger</button>
+        </div>`;
+        // <div id="menu2_1" class="card" style="width: 20rem;">
+        //     <button type="button" class="btn btn-dark" id="DensityTrigger">Density Trigger</button>
+        // </Div>
+        // `;
+    menu.appendChild(row1);
+    document.querySelector("#MaskTrigger").onclick=()=>{switchSciChart2_1()};
+}
+
+function initMenu2_1(){
+    document.querySelector("#menu2_1").innerHTML +=
+    `<div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <input type="number" class="form-control" id="xPoint1" disabled>
+                </div>
+                <div class="col">
+                    <input type="number" class="form-control" id="yPoint1" disabled>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input type="number" class="form-control" id="xPoint2">
+                </div>
+                <div class="col">
+                    <input type="number" class="form-control" id="yPoint2">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input type="number" class="form-control" id="xPoint3">
+                </div>
+                <div class="col">
+                    <input type="number" class="form-control" id="yPoint3">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input type="number" class="form-control" id="xPoint4" disabled>
+                </div>
+                <div class="col">
+                    <input type="number" class="form-control" id="yPoint4" disabled>
+                </div>
+            </div>
+            <button type="button" class="btn btn-dark" id="setFrequencyMask">Active</button>
+    </div>`
 }
 
 const initSciChart2_1 = async () => {
@@ -431,12 +431,38 @@ const initSciChart2_1 = async () => {
     let spectrum = Buffer.alloc(count*4);
 
     // New DS
-    const xValues = Array.from(Array(count).keys());
+    const xValues = Array.from(Array(count).keys()).map(i=>(i-1023/2)/1023*2*307.2e6);
     const yValues = Array(count).fill(0);
     const ds = new XyDataSeries(wasmContext,{xValues,yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
 
+    // New Mask DS
+    const xPoints = [-307.2e6, -100e6, 100e6, 307.2e6];
+    const yPoints = [100, 60, 60, 100];
+    const maskDs = new XyDataSeries(wasmContext,{xValues: xPoints, yValues: yPoints, fifoCapacity: 4});
+
+    function updateMaskDs() {
+        for (let i = 1; i <= 4; i++) {
+            maskDs.append(xPoints[i - 1], yPoints[i - 1]);
+        }
+    }
+    for(let i=1; i<=4; i++){
+        document.querySelector("#xPoint"+i).value=xPoints[i-1];
+        document.querySelector("#yPoint"+i).value=yPoints[i-1];
+        document.querySelector("#xPoint"+i).onchange=()=>{xPoints[i-1]=Number(document.querySelector('#xPoint'+i).value);updateMaskDs();}
+        document.querySelector("#yPoint"+i).onchange=()=>{yPoints[i-1]=Number(document.querySelector('#yPoint'+i).value);updateMaskDs();}
+    }
+  
     // Add LineSeries to the chart.
     sciChartSurface.renderableSeries.add(new FastLineRenderableSeries(wasmContext, { dataSeries: ds }));
+    sciChartSurface.renderableSeries.add(new FastMountainRenderableSeries(wasmContext, { dataSeries: maskDs,stroke: '#ffa50099',strokeThickness: 3,
+        zeroLineY: 100,
+        fill:'#ffa50050',
+        pointMarker: new EllipsePointMarker(wasmContext, {
+            width: 11,
+            height: 11,
+            fill: "#ffa500"
+        }) 
+    }));
 
     // Add some interaction modifiers to show zooming and panning
     sciChartSurface.chartModifiers.add(
@@ -445,15 +471,35 @@ const initSciChart2_1 = async () => {
         new RubberBandXyZoomModifier(),
     );
 
+    // Active Mask
+    const allMaskPoint= Buffer.alloc(1024*4);
+    window.setFrequencyMask=()=>{
+        transcom.RunningMode_SelectTriggerSource(2, 2.4e9, 614.4e6 / 4, 0.1, 0, 0);
+        transcom.RunningMode_ResetTriggerStatus(2, 0.1);
+
+        //update allmaskPoint
+        for(let i=0;i<1024;i++){
+            let j=0;
+            while(xValues[i]>=xPoints[j]&&j<3)j++;
+            allMaskPoint.writeFloatLE(yPoints[j-1]+(yPoints[j]-yPoints[j-1])/(xPoints[j]-xPoints[j-1])*(xValues[i]-xPoints[j-1]),i*4);
+        }
+        console.log(new Float32Array(allMaskPoint.buffer));
+        transcom.RunningMode_SetFrequencyMask(true, 614.4e6, 5000, allMaskPoint, 0);
+        console.log("end setMask");
+    }
+    document.querySelector('#setFrequencyMask').addEventListener('click',setFrequencyMask);
+
     window.updateChart2_1 = ()=>{
-        // console.time('updateChart3')
         //update spectrum data
+        // console.log("start Spectrum_GetData");
         transcom.Spectrum_GetData(spectrum);
+        // console.log("end Spectrum_GetData");
         
         // 20* log
         for(let i=0;i<count;i++){
-            yValues[i] = 20*Math.log(spectrum.readFloatLE(i*4))
+            yValues[i] = 20*Math.log(spectrum.readUint32LE(i*4))-160.75;
         }
+        
 
         //update chart3
         ds.appendRange(xValues,yValues)
@@ -464,26 +510,102 @@ const initSciChart2_1 = async () => {
     }
 
     window.updateChart2_1ByWorker = ()=>{
-        let worker = new Worker('worker.js',{name:'chart3'});
+        let worker = new Worker('worker.js',{name:'chart2_1'});
         worker.onmessage = (e)=>{
-            let t =new Float32Array(e.data);
+            let t =new Uint32Array(e.data);
             for(let i=0;i<count;i++){
-                yValues[i] = 20*Math.log(t[i])
+                yValues[i] = 20*Math.log(t[i])-160.75;
             }
             ds.appendRange(xValues,yValues)
         }
     }
 }
 
+const initSciChart2_2 = async () => {
+    // Initialize SciChartSurface.
+    addChartElement("scichart2_2")
+    const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart2_2");
+
+    // Add xAxis,yAxis
+    sciChartSurface.xAxes.add(new NumericAxis(wasmContext));
+    sciChartSurface.yAxes.add(new NumericAxis(wasmContext));
+
+    // Add DS
+    const WIDTH = 1024;
+    const HEIGHT = 512;
+    const zValue = Array(HEIGHT).fill(Array(WIDTH).fill(0));
+    const heatmapDataSeries = new UniformHeatmapDataSeries(wasmContext, {
+        xStart: 0,
+        xStep: 1,
+        yStart: 0,
+        yStep: 1,
+        zValues: zValue
+    });
+   
+    // Create a Heatmap RenderableSeries with the color map. ColorMap.minimum/maximum defines the values in
+    // HeatmapDataSeries which correspond to gradient stops at 0..1
+    const heatmapSeries = new UniformHeatmapRenderableSeries(wasmContext, {
+        dataSeries: heatmapDataSeries,
+        useLinearTextureFiltering: false,
+        colorMap: new HeatmapColorMap({
+            minimum: 0,
+            maximum: 1,
+            gradientStops: [
+                { offset : 0, color: "Transparent"},
+                { offset : 0.1, color : "#0000FF"},
+                { offset : 0.2, color : "#0D8FBF"},
+                { offset : 0.3, color : "#00FFFF"},
+                { offset : 0.4, color : "#70AA39"},
+                { offset : 0.5, color : "#00FF00"},
+                { offset : 0.6, color : "#FFFF00"},
+                { offset : 0.7, color : "#FF8000"},
+                { offset : 0.8, color : "#FF4500"},
+                { offset : 0.9, color : "#FF0000"},
+                { offset : 1, color :   "#FF0000"},
+            ]
+        })
+    });
+
+    // Add Line
+    sciChartSurface.renderableSeries.add(heatmapSeries);
+
+    sciChartSurface.chartModifiers.add(
+        new MouseWheelZoomModifier(),
+        new ZoomPanModifier(),
+        new ZoomExtentsModifier()
+    );
+
+    window.updateChart2_2ByWorker = ()=>{
+        const worker = new Worker('worker.js',{name:'chart2_2'});
+        worker.onmessage = (e)=>{
+            heatmapDataSeries.setZValues(e.data)
+            worker.postMessage('continue')
+        }
+        worker.postMessage('start')
+    }
+}
+
 function switchSciChart2_1(){
     if(document.querySelector("#scichart2_1")){
-        console.log("delete SciChart2_1");
         document.querySelector("#scichart2_1").remove();
     }else{
-        console.log("append SciChart2_1");
+        initMenu2_1();
         initSciChart2_1().then(()=>{
-            // updateChart3(); raw.readSpectrumForever();
+            //  updateChart2_1(); raw.readSpectrumForever();
             updateChart2_1ByWorker();
         });
     }
 }
+
+function switchSciChart2_2(){
+    if(document.querySelector("#scichart2_2")){
+        document.querySelector("#scichart2_2").remove();
+    }else{
+        initSciChart2_2().then(()=>{
+            updateChart2_2ByWorker()
+        })
+    }
+}
+
+//-------------------------------------------------------- Background  ------------------------------------------------------------//
+Device_Init && new Worker('worker.js',{name:'getInterrupt'});

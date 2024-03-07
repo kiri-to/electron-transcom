@@ -17,23 +17,31 @@ window.raw = ffi.Library('raw', {
     'hello':['string',['string']],
     'fftShift':['bool',['int','short*']],
     'fftiqShift':['bool',['int','short*','short*']],
-    'readSpectrumForever':['void',[]]
+    'readSpectrumForever':['void',[]],
+    'getFpgaInterrupt':['void',['char *']]
 })
 
 //加载TranscomApi
 window.transcom = ffi.Library('TranscomApi', {
     'Device_Init':['int',[]],
     'IQ_GetData_InFreeRun':['int',['char *','double']],
+    'IQ_GetData_InTrigger':['int',['char *','int','double','double']],
     'Spectrum_GetData':['int',['char *']],
-    'Persistence_GetData':['int',['char *']]
+    'Persistence_GetData':['int',['char *']],
+    'RunningMode_SelectTriggerSource':['int',['uchar','double','double','double','double','uint']],
+    'RunningMode_ResetTriggerStatus':['int',['uchar','double']],
+    'RunningMode_SetFrequencyMask':['int',['bool','double','double','float *','int']]
 })
 
 //Open Device
+window.Device_Init= false;
 setTimeout(()=>{
 console.time('Device_Init')
-if(transcom.Device_Init()==1)
+if(transcom.Device_Init()==1){
+    Device_Init = true;
     console.log('Device_Init success');
+}
 else
     console.log('Device_Init failed');
 console.timeEnd('Device_Init')
-},1e3)
+},100)
