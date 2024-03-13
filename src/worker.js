@@ -34,7 +34,6 @@ if(self.name=='chart2'){
     let setTriggerOffset=0.02;
     let span = 614.4E6;
     let triggerCount = setTriggerOffset * span / 25;
-    const iqDataTrigger = new Buffer.alloc(triggerCount);
 
     getFreeRun = (e)=>{
         transcom.IQ_GetData_InFreeRun(iqData,count)
@@ -70,19 +69,19 @@ if(self.name=='chart2'){
 
         console.log("get Interrupt: ",intrData);
 
-        transcom.IQ_GetData_InTrigger(iqDataTrigger, 0, setTriggerOffset, span);
+        transcom.IQ_GetData_InTrigger(iqData, 0, setTriggerOffset, span);
         
         console.log('end getInTrigger')
         
-        iData = Buffer.alloc(triggerCount / 2);
-        qData = Buffer.alloc(triggerCount / 2);
-        for(let i=0;i<triggerCount / 2;i+=2){
-            iData[i] = iqDataTrigger[i*2]
-            iData[i+1] = iqDataTrigger[i*2+1]
-            qData[i] = iqDataTrigger[i*2+2]
-            qData[i+1] = iqDataTrigger[i*2+3]
+        let iData = Buffer.from(e.data[0])
+        let qData = Buffer.from(e.data[1])
+        for(let i=0;i<count*2;i+=2){
+            iData[i] = iqData[i*2]
+            iData[i+1] = iqData[i*2+1]
+            qData[i] = iqData[i*2+2]
+            qData[i+1] = iqData[i*2+3]
         }
-        postMessage([iData.buffer, qData.buffer,'trigger'], [iData.buffer, qData.buffer])
+        postMessage([e.data[0], e.data[1]], [e.data[0], e.data[1]])
         console.log("end getInTrigger")
     }
 
@@ -119,16 +118,5 @@ if(self.name=='chart4'|| self.name=='chart2_2'){
             zValue[i] = Array.from(new Float32Array(persistenceData.buffer, i*1024*4, 1024));
         }
         postMessage(zValue)
-    }
-}
-
-
-if(self.name=='getInterrupt'){
-    console.log("start monitor interrupt");
-    let data = Buffer.alloc(4);
-    while(1){
-        transcom.RunningMode_ResetTriggerStatus(2,0.1);
-        raw.getFpgaInterrupt(data);
-        console.log("get Interrupt: ",data);
     }
 }

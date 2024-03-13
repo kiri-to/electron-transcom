@@ -175,17 +175,17 @@ const initSciChart2 = async () => {
     window.updateChart2ByWorker = () => {
         updateChart2ByWorker.worker = new Worker("worker.js", { name: 'chart2' });
         updateChart2ByWorker.worker.onmessage = (e) => {
-            if (e.data[2] == 'trigger') {
-                IDS.appendRange(xTriggerValues, Array.from(new Int16Array(e.data[0])));
-                QDS.appendRange(xTriggerValues, Array.from(new Int16Array(e.data[1])));
-                updateChart2ByWorker.worker.postMessage([0,0,'trigger'])
-            } else {
+            // if (e.data[2] == 'trigger') {
+            //     IDS.appendRange(xTriggerValues, Array.from(new Int16Array(e.data[0])));
+            //     QDS.appendRange(xTriggerValues, Array.from(new Int16Array(e.data[1])));
+            //     updateChart2ByWorker.worker.postMessage(1)
+            // } else {
                 // console.time('updateChart2')
                 IDS.appendRange(xValues, Array.from(new Int16Array(e.data[0])));
                 QDS.appendRange(xValues, Array.from(new Int16Array(e.data[1])));
                 // console.timeEnd('updateChart2')
                 updateChart2ByWorker.worker.postMessage([e.data[0], e.data[1]], [e.data[0], e.data[1]])
-            }
+            // }
         }
         updateChart2ByWorker.worker.postMessage([iData, qData], [iData, qData])
     }
@@ -242,7 +242,7 @@ const initSciChart3 = async () => {
         worker.onmessage = (e) => {
             let t = new Uint32Array(e.data);
             for (let i = 0; i < count; i++) {
-                yValues[i] = 20 * Math.log10(t[i]) - 160.75;
+                yValues[i] = 20 * Math.log10(t[i]) - 132.95;
             }
             ds.appendRange(xValues, yValues)
         }
@@ -501,8 +501,8 @@ const initSciChart2_1 = async () => {
         console.log("end setMask");
 
         //switch iq_chart status
-        // new Worker('worker.js',{name:'getInterrupt'});
-        updateChart2ByWorker && updateChart2ByWorker.worker.postMessage([0, 0, "trigger"]);
+        let count = 122880;
+        updateChart2ByWorker && updateChart2ByWorker.worker.postMessage([new ArrayBuffer(count*2),new ArrayBuffer(count*2),'trigger']);
     }
 
     document.querySelector('#setFrequencyMask').addEventListener('click', setFrequencyMask);
@@ -514,6 +514,7 @@ const initSciChart2_1 = async () => {
             for (let i = 0; i < count; i++) {
                 yValues[i] = 20 * Math.log10(t[i]?t[i]:1) - 132.95;
             }
+ 
             ds.appendRange(xValues, yValues)
         }
     }
@@ -608,23 +609,6 @@ function switchSciChart2_2() {
 }
 
 //-------------------------------------------------------- end  ------------------------------------------------------------//
-window.testOpen = () => {
-    fs.open(String.raw`\\.\xillyusb_00_intr`, 'r', function (err, fd) {
-        if (err) {
-            console.log('打开文件出错！');
-            return;
-        }
-        console.log('文件打开成功！');
-        let buffer = Buffer.alloc(255);
-        fs.read(fd, buffer, 0, buffer.length, 0, function (err, bytes) {
-            if (err) {
-                throw err;
-            } else {
-                console.log(bytes + ': ' + buffer.slice(0, bytes).toString());
-            }
-        })
-    })
-}
 
 window.testTrigger = () => {
     updateChart2ByWorker && updateChart2ByWorker.worker.postMessage([0, 0, "trigger"]);
