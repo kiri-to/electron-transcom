@@ -1,3 +1,4 @@
+import { data } from "autoprefixer";
 import "./index.scss"
 const bootstrap = require("bootstrap")
 const {
@@ -25,9 +26,9 @@ const {
     YAxisDragModifier,
     LeftAlignedOuterVerticallyStackedAxisLayoutStrategy,
     EAxisAlignment
-}  = require('scichart')
+} = require('scichart')
 
-function initNav(){
+function initNav() {
     let div1 = document.createElement("div");
     div1.innerHTML = `<svg width="100%" height="100%"><rect x="7" y="20" rx="10" ry="10" width="30" height="30" stroke="green" fill="transparent" stroke-width="5"/></svg>`
     document.querySelector("#nav").appendChild(div1);
@@ -37,13 +38,13 @@ function initNav(){
     div2.style.paddingLeft = "7px";
     document.querySelector("#nav").appendChild(div2);
 
-    div1.onclick=()=>{initMenu1()}
-    div2.onclick=()=>{initMenu2()}
+    div1.onclick = () => { initMenu1() }
+    div2.onclick = () => { initMenu2() }
 }
 initNav();
 const menu = document.querySelector("#menu")
 
-function addChartElement(chartName){
+function addChartElement(chartName) {
     const div = document.createElement("div");
     div.id = chartName;
     div.class = "scichart";
@@ -51,15 +52,15 @@ function addChartElement(chartName){
 }
 
 //-------------------------------------------------------- Menu 1  ------------------------------------------------------------//
-function initMenu1(){
-    menu.innerHTML='';
-    
-    let charts = ["File Data","IQ","Spectrum","Persistence"];
-    for(let i=1;i<=4;i++){
+function initMenu1() {
+    menu.innerHTML = '';
+
+    let charts = ["File Data", "IQ", "Spectrum", "Persistence"];
+    for (let i = 1; i <= 4; i++) {
         let row = document.createElement("div");
         row.className = "row";
-        row.innerHTML = `<button type="button" class="btn btn-dark">`+charts[i-1]+`</button>` ;
-        row.onclick=()=>{eval("switchSciChart"+i+"()")};
+        row.innerHTML = `<button type="button" class="btn btn-dark">` + charts[i - 1] + `</button>`;
+        row.onclick = () => { eval("switchSciChart" + i + "()") };
         menu.appendChild(row);
     }
 }
@@ -100,15 +101,15 @@ const initSciChart1 = async () => {
 
 
     window.iq = fs.readFileSync(iqPath)
-    iq = Buffer.from(iq.buffer.slice(0,8192))
+    iq = Buffer.from(iq.buffer.slice(0, 8192))
     let x1 = new Array();
-    for (var i = 0; i < iq.length/4; i++) {
+    for (var i = 0; i < iq.length / 4; i++) {
         x1[i] = i;
     }
 
     console.log(iq.buffer)
     console.log(x1.length)
-    raw.fftShift(iq.length/2,iq)
+    raw.fftShift(iq.length / 2, iq)
     console.log(raw.hello('kiri-to'));
 
     // Create a line series with some initial data
@@ -134,29 +135,30 @@ const initSciChart1 = async () => {
 const initSciChart2 = async () => {
     // Initialize SciChartSurface.
     addChartElement("scichart2");
-    const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart2");
+    const { sciChartSurface, wasmContext } = await SciChartSurface.createSingle("scichart2");
 
     // Add xAxis,yAxis
     sciChartSurface.xAxes.add(new NumericAxis(wasmContext));
-    sciChartSurface.yAxes.add(new NumericAxis(wasmContext,{id:'y1',axisTitle:"I",axisAlignment: EAxisAlignment.Left}));
-    sciChartSurface.yAxes.add(new NumericAxis(wasmContext,{id:'y2',axisTitle:"Q",axisAlignment: EAxisAlignment.Left}));
+    sciChartSurface.yAxes.add(new NumericAxis(wasmContext, { id: 'y1', axisTitle: "I", axisAlignment: EAxisAlignment.Left }));
+    sciChartSurface.yAxes.add(new NumericAxis(wasmContext, { id: 'y2', axisTitle: "Q", axisAlignment: EAxisAlignment.Left }));
     sciChartSurface.layoutManager.leftOuterAxesLayoutStrategy = new LeftAlignedOuterVerticallyStackedAxisLayoutStrategy(); // 使Lines沿Y轴顺序排列
 
     // Define iqdata
-    const count = 1e6;
-    const iData = new ArrayBuffer(count*2);
-    const qData = new ArrayBuffer(count*2);
+    const count = 122880;
+    const iData = new ArrayBuffer(count * 2);
+    const qData = new ArrayBuffer(count * 2);
 
     // Add Points
     const xValues = Array.from(Array(count).keys())
+    const xTriggerValues = Array.from(Array(122880).keys())
     const yValues = Array(count).fill(0)
-    const IDS = new XyDataSeries(wasmContext,{xValues,yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
-    const QDS = new XyDataSeries(wasmContext,{xValues,yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
+    const IDS = new XyDataSeries(wasmContext, { xValues, yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false });
+    const QDS = new XyDataSeries(wasmContext, { xValues, yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false });
 
     // Add Lines
-    const IRS = new FastLineRenderableSeries(wasmContext,{yAxisId:'y1',dataSeries:IDS ,stroke:"auto"});
-    const QRS = new FastLineRenderableSeries(wasmContext, {yAxisId:'y2',dataSeries: QDS ,stroke:"auto"});
-    sciChartSurface.renderableSeries.add(IRS,QRS);
+    const IRS = new FastLineRenderableSeries(wasmContext, { yAxisId: 'y1', dataSeries: IDS, stroke: "auto" });
+    const QRS = new FastLineRenderableSeries(wasmContext, { yAxisId: 'y2', dataSeries: QDS, stroke: "auto" });
+    sciChartSurface.renderableSeries.add(IRS, QRS);
 
     // Add some interaction modifiers to show zooming and panning
     sciChartSurface.chartModifiers.add(
@@ -170,24 +172,29 @@ const initSciChart2 = async () => {
     //TODO 自己实现appendRange直接传递ArrayBuffer
     //TODO C++直接拆分好I与Q
     //TODO convert worker to worker_thread module
-    window.updateChart2ByWorker = ()=>{
-        updateChart2ByWorker.worker = new Worker("worker.js", { name: 'chart2'});
+    window.updateChart2ByWorker = () => {
+        updateChart2ByWorker.worker = new Worker("worker.js", { name: 'chart2' });
         updateChart2ByWorker.worker.onmessage = (e) => {
-            // console.time('updateChart2')
-            IDS.appendRange(xValues, Array.from(new Int16Array(e.data[0])));
-            QDS.appendRange(xValues, Array.from(new Int16Array(e.data[1])));
-            // console.timeEnd('updateChart2')
-
-            updateChart2ByWorker.worker.postMessage([e.data[0], e.data[1]], [e.data[0], e.data[1]])
+            if (e.data[2] == 'trigger') {
+                IDS.appendRange(xTriggerValues, Array.from(new Int16Array(e.data[0])));
+                QDS.appendRange(xTriggerValues, Array.from(new Int16Array(e.data[1])));
+                updateChart2ByWorker.worker.postMessage([0,0,'trigger'])
+            } else {
+                // console.time('updateChart2')
+                IDS.appendRange(xValues, Array.from(new Int16Array(e.data[0])));
+                QDS.appendRange(xValues, Array.from(new Int16Array(e.data[1])));
+                // console.timeEnd('updateChart2')
+                updateChart2ByWorker.worker.postMessage([e.data[0], e.data[1]], [e.data[0], e.data[1]])
+            }
         }
-        updateChart2ByWorker.worker.postMessage([iData,qData],[iData,qData])
+        updateChart2ByWorker.worker.postMessage([iData, qData], [iData, qData])
     }
 }
 
 const initSciChart3 = async () => {
     // Initialize SciChartSurface.
     addChartElement("scichart3")
-    const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart3");
+    const { sciChartSurface, wasmContext } = await SciChartSurface.createSingle("scichart3");
 
     // Add xAxis,yAxis
     sciChartSurface.xAxes.add(new NumericAxis(wasmContext));
@@ -195,12 +202,12 @@ const initSciChart3 = async () => {
 
     // Define spectrum
     const count = 1024;
-    let spectrum = Buffer.alloc(count*4);
+    let spectrum = Buffer.alloc(count * 4);
 
     // New DS
     const xValues = Array.from(Array(count).keys());
     const yValues = Array(count).fill(0);
-    const ds = new XyDataSeries(wasmContext,{xValues,yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
+    const ds = new XyDataSeries(wasmContext, { xValues, yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false });
 
     // Add LineSeries to the chart.
     sciChartSurface.renderableSeries.add(new FastLineRenderableSeries(wasmContext, { dataSeries: ds }));
@@ -212,32 +219,32 @@ const initSciChart3 = async () => {
         new RubberBandXyZoomModifier(),
     );
 
-    window.updateChart3 = ()=>{
+    window.updateChart3 = () => {
         // console.time('updateChart3')
         //update spectrum data
         transcom.Spectrum_GetData(spectrum);
-        
+
         // 20* log
-        for(let i=0;i<count;i++){
-            yValues[i] = 20*Math.log(spectrum.readUint32LE(i*4))-160.75;
+        for (let i = 0; i < count; i++) {
+            yValues[i] = 20 * Math.log10(spectrum.readUint32LE(i * 4)) - 132.95;
         }
 
         //update chart3
-        ds.appendRange(xValues,yValues)
+        ds.appendRange(xValues, yValues)
 
         //invoke after 2ms
-        setTimeout(updateChart3,2);
+        setTimeout(updateChart3, 2);
         // console.timeEnd('updateChart3')
     }
 
-    window.updateChart3ByWorker = ()=>{
-        let worker = new Worker('worker.js',{name:'chart3'});
-        worker.onmessage = (e)=>{
-            let t =new Uint32Array(e.data);
-            for(let i=0;i<count;i++){
-                yValues[i] = 20*Math.log(t[i])-160.75;
+    window.updateChart3ByWorker = () => {
+        let worker = new Worker('worker.js', { name: 'chart3' });
+        worker.onmessage = (e) => {
+            let t = new Uint32Array(e.data);
+            for (let i = 0; i < count; i++) {
+                yValues[i] = 20 * Math.log10(t[i]) - 160.75;
             }
-            ds.appendRange(xValues,yValues)
+            ds.appendRange(xValues, yValues)
         }
         // setTimeout(()=>{worker.terminate()},10000)
     }
@@ -246,7 +253,7 @@ const initSciChart3 = async () => {
 const initSciChart4 = async () => {
     // Initialize SciChartSurface.
     addChartElement("scichart4");
-    const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart4");
+    const { sciChartSurface, wasmContext } = await SciChartSurface.createSingle("scichart4");
 
     // Add xAxis,yAxis
     sciChartSurface.xAxes.add(new NumericAxis(wasmContext));
@@ -263,7 +270,7 @@ const initSciChart4 = async () => {
         yStep: 1,
         zValues: zValue
     });
-   
+
     // Create a Heatmap RenderableSeries with the color map. ColorMap.minimum/maximum defines the values in
     // HeatmapDataSeries which correspond to gradient stops at 0..1
     const heatmapSeries = new UniformHeatmapRenderableSeries(wasmContext, {
@@ -273,17 +280,17 @@ const initSciChart4 = async () => {
             minimum: 0,
             maximum: 1,
             gradientStops: [
-                { offset : 0, color: "Transparent"},
-                { offset : 0.1, color : "#0000FF"},
-                { offset : 0.2, color : "#0D8FBF"},
-                { offset : 0.3, color : "#00FFFF"},
-                { offset : 0.4, color : "#70AA39"},
-                { offset : 0.5, color : "#00FF00"},
-                { offset : 0.6, color : "#FFFF00"},
-                { offset : 0.7, color : "#FF8000"},
-                { offset : 0.8, color : "#FF4500"},
-                { offset : 0.9, color : "#FF0000"},
-                { offset : 1, color :   "#FF0000"},
+                { offset: 0, color: "Transparent" },
+                { offset: 0.1, color: "#0000FF" },
+                { offset: 0.2, color: "#0D8FBF" },
+                { offset: 0.3, color: "#00FFFF" },
+                { offset: 0.4, color: "#70AA39" },
+                { offset: 0.5, color: "#00FF00" },
+                { offset: 0.6, color: "#FFFF00" },
+                { offset: 0.7, color: "#FF8000" },
+                { offset: 0.8, color: "#FF4500" },
+                { offset: 0.9, color: "#FF0000" },
+                { offset: 1, color: "#FF0000" },
             ]
         })
     });
@@ -297,9 +304,9 @@ const initSciChart4 = async () => {
         new ZoomExtentsModifier()
     );
 
-    window.updateChart4ByWorker = ()=>{
-        const worker = new Worker('worker.js',{name:'chart4'});
-        worker.onmessage = (e)=>{
+    window.updateChart4ByWorker = () => {
+        const worker = new Worker('worker.js', { name: 'chart4' });
+        worker.onmessage = (e) => {
             heatmapDataSeries.setZValues(e.data)
             worker.postMessage('continue')
         }
@@ -307,48 +314,48 @@ const initSciChart4 = async () => {
     }
 }
 
-function switchSciChart1(){
-    if(document.querySelector("#scichart1")){
+function switchSciChart1() {
+    if (document.querySelector("#scichart1")) {
         console.log("delete SciChart1");
         document.querySelector("#scichart1").remove();
-    }else{
+    } else {
         console.log("append SciChart1");
         initSciChart1();
     }
 }
 
-function switchSciChart2(){
-    if(document.querySelector("#scichart2")){
+function switchSciChart2() {
+    if (document.querySelector("#scichart2")) {
         console.log("delete SciChart2");
         document.querySelector("#scichart2").remove();
-    }else{
+    } else {
         console.log("append SciChart2");
-        initSciChart2().then(()=>{
+        initSciChart2().then(() => {
             updateChart2ByWorker();
         });
     }
 }
 
-function switchSciChart3(){
-    if(document.querySelector("#scichart3")){
+function switchSciChart3() {
+    if (document.querySelector("#scichart3")) {
         console.log("delete SciChart3");
         document.querySelector("#scichart3").remove();
-    }else{
+    } else {
         console.log("append SciChart3");
-        initSciChart3().then(()=>{
+        initSciChart3().then(() => {
             // updateChart3(); raw.readSpectrumForever();
             updateChart3ByWorker();
         });
     }
 }
 
-function switchSciChart4(){
-    if(document.querySelector("#scichart4")){
+function switchSciChart4() {
+    if (document.querySelector("#scichart4")) {
         console.log("delete SciChart4");
         document.querySelector("#scichart4").remove();
-    }else{
+    } else {
         console.log("append SciChart4");
-        initSciChart4().then(()=>{
+        initSciChart4().then(() => {
             updateChart4ByWorker()
         })
     }
@@ -356,71 +363,71 @@ function switchSciChart4(){
 
 //      manual invoke for default     //
 // switchSciChart1();  
-// switchSciChart2();  
+switchSciChart2();
 // switchSciChart3();  
 // switchSciChart4();  
 
 //-------------------------------------------------------- Menu 2  ------------------------------------------------------------//
-function initMenu2(){
-    menu.innerHTML='';
+function initMenu2() {
+    menu.innerHTML = '';
 
     const row1 = document.createElement("div");
     row1.className = "row";
-    row1.innerHTML = 
-        `<div id="menu2_1" class="card" style="width: 20rem;">
+    row1.innerHTML =
+        `<div  class="card" style="width: 20rem;">
             <button type="button" class="btn btn-dark" id="MaskTrigger">Mask Trigger</button>
+            <div class="card-body" id="card2_1"><div>
         </div>`;
-        // <div id="menu2_1" class="card" style="width: 20rem;">
-        //     <button type="button" class="btn btn-dark" id="DensityTrigger">Density Trigger</button>
-        // </Div>
-        // `;
+    // <div  class="card" style="width: 20rem;">
+    //     <button type="button" class="btn btn-dark" id="DensityTrigger">Density Trigger</button>
+    // </Div>
+    // `;
     menu.appendChild(row1);
-    document.querySelector("#MaskTrigger").onclick=()=>{switchSciChart2_1()};
+    document.querySelector("#MaskTrigger").onclick = () => { switchSciChart2_1() };
 }
 
-function initMenu2_1(){
-    document.querySelector("#menu2_1").innerHTML +=
-    `<div class="card-body">
-            <div class="row">
-                <div class="col">
-                    <input type="number" class="form-control" id="xPoint1" disabled>
-                </div>
-                <div class="col">
-                    <input type="number" class="form-control" id="yPoint1" disabled>
-                </div>
+function initMenu2_1() {
+    document.querySelector("#card2_1").innerHTML =
+        `<div class="row">
+            <div class="col">
+                <input type="number" class="form-control" id="xPoint1" disabled>
             </div>
-            <div class="row">
-                <div class="col">
-                    <input type="number" class="form-control" id="xPoint2">
-                </div>
-                <div class="col">
-                    <input type="number" class="form-control" id="yPoint2">
-                </div>
+            <div class="col">
+                <input type="number" class="form-control" id="yPoint1" disabled>
             </div>
-            <div class="row">
-                <div class="col">
-                    <input type="number" class="form-control" id="xPoint3">
-                </div>
-                <div class="col">
-                    <input type="number" class="form-control" id="yPoint3">
-                </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <input type="number" class="form-control" id="xPoint2">
             </div>
-            <div class="row">
-                <div class="col">
-                    <input type="number" class="form-control" id="xPoint4" disabled>
-                </div>
-                <div class="col">
-                    <input type="number" class="form-control" id="yPoint4" disabled>
-                </div>
+            <div class="col">
+                <input type="number" class="form-control" id="yPoint2">
             </div>
-            <button type="button" class="btn btn-dark" id="setFrequencyMask">Active</button>
-    </div>`
+        </div>
+        <div class="row">
+            <div class="col">
+                <input type="number" class="form-control" id="xPoint3">
+            </div>
+            <div class="col">
+                <input type="number" class="form-control" id="yPoint3">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <input type="number" class="form-control" id="xPoint4" disabled>
+            </div>
+            <div class="col">
+                <input type="number" class="form-control" id="yPoint4" disabled>
+            </div>
+        </div>
+        <button type="button" class="btn btn-dark" id="setFrequencyMask">Active</button>
+        `
 }
 
 const initSciChart2_1 = async () => {
     // Initialize SciChartSurface.
     addChartElement("scichart2_1")
-    const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart2_1");
+    const { sciChartSurface, wasmContext } = await SciChartSurface.createSingle("scichart2_1");
 
     // Add xAxis,yAxis
     sciChartSurface.xAxes.add(new NumericAxis(wasmContext));
@@ -428,40 +435,41 @@ const initSciChart2_1 = async () => {
 
     // Define spectrum
     const count = 1024;
-    let spectrum = Buffer.alloc(count*4);
+    let spectrum = Buffer.alloc(count * 4);
 
     // New DS
-    const xValues = Array.from(Array(count).keys()).map(i=>(i-1023/2)/1023*2*307.2e6);
+    const xValues = Array.from(Array(count).keys()).map(i => (i - 1023 / 2) / 1023 * 2 * 307.2e6);
     const yValues = Array(count).fill(0);
-    const ds = new XyDataSeries(wasmContext,{xValues,yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false});
+    const ds = new XyDataSeries(wasmContext, { xValues, yValues, fifoCapacity: count, dataIsSortedInX: true, dataEvenlySpacedInX: true, containsNaN: false });
 
     // New Mask DS
     const xPoints = [-307.2e6, -100e6, 100e6, 307.2e6];
-    const yPoints = [100, 60, 60, 100];
-    const maskDs = new XyDataSeries(wasmContext,{xValues: xPoints, yValues: yPoints, fifoCapacity: 4});
+    const yPoints = [0, -60, -60, 0];
+    const maskDs = new XyDataSeries(wasmContext, { xValues: xPoints, yValues: yPoints, fifoCapacity: 4 });
 
     function updateMaskDs() {
         for (let i = 1; i <= 4; i++) {
             maskDs.append(xPoints[i - 1], yPoints[i - 1]);
         }
     }
-    for(let i=1; i<=4; i++){
-        document.querySelector("#xPoint"+i).value=xPoints[i-1];
-        document.querySelector("#yPoint"+i).value=yPoints[i-1];
-        document.querySelector("#xPoint"+i).onchange=()=>{xPoints[i-1]=Number(document.querySelector('#xPoint'+i).value);updateMaskDs();}
-        document.querySelector("#yPoint"+i).onchange=()=>{yPoints[i-1]=Number(document.querySelector('#yPoint'+i).value);updateMaskDs();}
+    for (let i = 1; i <= 4; i++) {
+        document.querySelector("#xPoint" + i).value = xPoints[i - 1];
+        document.querySelector("#yPoint" + i).value = yPoints[i - 1];
+        document.querySelector("#xPoint" + i).onchange = () => { xPoints[i - 1] = Number(document.querySelector('#xPoint' + i).value); updateMaskDs(); }
+        document.querySelector("#yPoint" + i).onchange = () => { yPoints[i - 1] = Number(document.querySelector('#yPoint' + i).value); updateMaskDs(); }
     }
-  
+
     // Add LineSeries to the chart.
     sciChartSurface.renderableSeries.add(new FastLineRenderableSeries(wasmContext, { dataSeries: ds }));
-    sciChartSurface.renderableSeries.add(new FastMountainRenderableSeries(wasmContext, { dataSeries: maskDs,stroke: '#ffa50099',strokeThickness: 3,
+    sciChartSurface.renderableSeries.add(new FastMountainRenderableSeries(wasmContext, {
+        dataSeries: maskDs, stroke: '#ffa50099', strokeThickness: 3,
         zeroLineY: 100,
-        fill:'#ffa50050',
+        fill: '#ffa50050',
         pointMarker: new EllipsePointMarker(wasmContext, {
             width: 11,
             height: 11,
             fill: "#ffa500"
-        }) 
+        })
     }));
 
     // Add some interaction modifiers to show zooming and panning
@@ -472,51 +480,41 @@ const initSciChart2_1 = async () => {
     );
 
     // Active Mask
-    const allMaskPoint= Buffer.alloc(1024*4);
-    window.setFrequencyMask=()=>{
+    const allMaskPoint = Buffer.alloc(1024 * 4);
+
+    window.setFrequencyMask = () => {
+        // switch device status
         transcom.RunningMode_SelectTriggerSource(2, 2.4e9, 614.4e6 / 4, 0.1, 0, 0);
         transcom.RunningMode_ResetTriggerStatus(2, 0.1);
 
         //update allmaskPoint
-        for(let i=0;i<1024;i++){
-            let j=0;
-            while(xValues[i]>=xPoints[j]&&j<3)j++;
-            allMaskPoint.writeFloatLE(yPoints[j-1]+(yPoints[j]-yPoints[j-1])/(xPoints[j]-xPoints[j-1])*(xValues[i]-xPoints[j-1]),i*4);
+        for (let i = 0; i < 1024; i++) {
+            let j = 0;
+            while (xValues[i] >= xPoints[j] && j < 3) j++;
+            allMaskPoint.writeFloatLE(yPoints[j - 1] + (yPoints[j] - yPoints[j - 1]) / (xPoints[j] - xPoints[j - 1]) * (xValues[i] - xPoints[j - 1]), i * 4);
         }
         console.log(new Float32Array(allMaskPoint.buffer));
-        transcom.RunningMode_SetFrequencyMask(true, 614.4e6, 5000, allMaskPoint, 0);
+
+        //set frequency mask
+        transcom.RunningMode_SetFrequencyMask(true, 614.4e6, 500e3, allMaskPoint, 0);
+        transcom.RunningMode_ResetTriggerStatus(2, 0.1);
         console.log("end setMask");
-    }
-    document.querySelector('#setFrequencyMask').addEventListener('click',setFrequencyMask);
 
-    window.updateChart2_1 = ()=>{
-        //update spectrum data
-        // console.log("start Spectrum_GetData");
-        transcom.Spectrum_GetData(spectrum);
-        // console.log("end Spectrum_GetData");
-        
-        // 20* log
-        for(let i=0;i<count;i++){
-            yValues[i] = 20*Math.log(spectrum.readUint32LE(i*4))-160.75;
-        }
-        
-
-        //update chart3
-        ds.appendRange(xValues,yValues)
-
-        //invoke after 2ms
-        setTimeout(updateChart2_1,2);
-        // console.timeEnd('updateChart3')
+        //switch iq_chart status
+        // new Worker('worker.js',{name:'getInterrupt'});
+        updateChart2ByWorker && updateChart2ByWorker.worker.postMessage([0, 0, "trigger"]);
     }
 
-    window.updateChart2_1ByWorker = ()=>{
-        let worker = new Worker('worker.js',{name:'chart2_1'});
-        worker.onmessage = (e)=>{
-            let t =new Uint32Array(e.data);
-            for(let i=0;i<count;i++){
-                yValues[i] = 20*Math.log(t[i])-160.75;
+    document.querySelector('#setFrequencyMask').addEventListener('click', setFrequencyMask);
+
+    window.updateChart2_1ByWorker = () => {
+        let worker = new Worker('worker.js', { name: 'chart2_1' });
+        worker.onmessage = (e) => {
+            let t = new Uint32Array(e.data);
+            for (let i = 0; i < count; i++) {
+                yValues[i] = 20 * Math.log10(t[i]?t[i]:1) - 132.95;
             }
-            ds.appendRange(xValues,yValues)
+            ds.appendRange(xValues, yValues)
         }
     }
 }
@@ -524,7 +522,7 @@ const initSciChart2_1 = async () => {
 const initSciChart2_2 = async () => {
     // Initialize SciChartSurface.
     addChartElement("scichart2_2")
-    const {sciChartSurface, wasmContext} = await SciChartSurface.createSingle("scichart2_2");
+    const { sciChartSurface, wasmContext } = await SciChartSurface.createSingle("scichart2_2");
 
     // Add xAxis,yAxis
     sciChartSurface.xAxes.add(new NumericAxis(wasmContext));
@@ -541,7 +539,7 @@ const initSciChart2_2 = async () => {
         yStep: 1,
         zValues: zValue
     });
-   
+
     // Create a Heatmap RenderableSeries with the color map. ColorMap.minimum/maximum defines the values in
     // HeatmapDataSeries which correspond to gradient stops at 0..1
     const heatmapSeries = new UniformHeatmapRenderableSeries(wasmContext, {
@@ -551,17 +549,17 @@ const initSciChart2_2 = async () => {
             minimum: 0,
             maximum: 1,
             gradientStops: [
-                { offset : 0, color: "Transparent"},
-                { offset : 0.1, color : "#0000FF"},
-                { offset : 0.2, color : "#0D8FBF"},
-                { offset : 0.3, color : "#00FFFF"},
-                { offset : 0.4, color : "#70AA39"},
-                { offset : 0.5, color : "#00FF00"},
-                { offset : 0.6, color : "#FFFF00"},
-                { offset : 0.7, color : "#FF8000"},
-                { offset : 0.8, color : "#FF4500"},
-                { offset : 0.9, color : "#FF0000"},
-                { offset : 1, color :   "#FF0000"},
+                { offset: 0, color: "Transparent" },
+                { offset: 0.1, color: "#0000FF" },
+                { offset: 0.2, color: "#0D8FBF" },
+                { offset: 0.3, color: "#00FFFF" },
+                { offset: 0.4, color: "#70AA39" },
+                { offset: 0.5, color: "#00FF00" },
+                { offset: 0.6, color: "#FFFF00" },
+                { offset: 0.7, color: "#FF8000" },
+                { offset: 0.8, color: "#FF4500" },
+                { offset: 0.9, color: "#FF0000" },
+                { offset: 1, color: "#FF0000" },
             ]
         })
     });
@@ -575,9 +573,9 @@ const initSciChart2_2 = async () => {
         new ZoomExtentsModifier()
     );
 
-    window.updateChart2_2ByWorker = ()=>{
-        const worker = new Worker('worker.js',{name:'chart2_2'});
-        worker.onmessage = (e)=>{
+    window.updateChart2_2ByWorker = () => {
+        const worker = new Worker('worker.js', { name: 'chart2_2' });
+        worker.onmessage = (e) => {
             heatmapDataSeries.setZValues(e.data)
             worker.postMessage('continue')
         }
@@ -585,27 +583,49 @@ const initSciChart2_2 = async () => {
     }
 }
 
-function switchSciChart2_1(){
-    if(document.querySelector("#scichart2_1")){
+function switchSciChart2_1() {
+    if (document.querySelector("#scichart2_1")) {
+        document.querySelector("#card2_1").innerHTML = '';
         document.querySelector("#scichart2_1").remove();
-    }else{
+        updateChart2ByWorker.worker.postMessage([0, 0, "freeRun"]);
+        updateChart2ByWorker.worker.postMessage([0, 0, "freeRunCpy"]);
+    } else {
         initMenu2_1();
-        initSciChart2_1().then(()=>{
-            //  updateChart2_1(); raw.readSpectrumForever();
+        initSciChart2_1().then(() => {
             updateChart2_1ByWorker();
         });
     }
 }
 
-function switchSciChart2_2(){
-    if(document.querySelector("#scichart2_2")){
+function switchSciChart2_2() {
+    if (document.querySelector("#scichart2_2")) {
         document.querySelector("#scichart2_2").remove();
-    }else{
-        initSciChart2_2().then(()=>{
+    } else {
+        initSciChart2_2().then(() => {
             updateChart2_2ByWorker()
         })
     }
 }
 
-//-------------------------------------------------------- Background  ------------------------------------------------------------//
-Device_Init && new Worker('worker.js',{name:'getInterrupt'});
+//-------------------------------------------------------- end  ------------------------------------------------------------//
+window.testOpen = () => {
+    fs.open(String.raw`\\.\xillyusb_00_intr`, 'r', function (err, fd) {
+        if (err) {
+            console.log('打开文件出错！');
+            return;
+        }
+        console.log('文件打开成功！');
+        let buffer = Buffer.alloc(255);
+        fs.read(fd, buffer, 0, buffer.length, 0, function (err, bytes) {
+            if (err) {
+                throw err;
+            } else {
+                console.log(bytes + ': ' + buffer.slice(0, bytes).toString());
+            }
+        })
+    })
+}
+
+window.testTrigger = () => {
+    updateChart2ByWorker && updateChart2ByWorker.worker.postMessage([0, 0, "trigger"]);
+}

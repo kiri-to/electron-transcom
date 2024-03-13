@@ -4,11 +4,15 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   // mode: "production",
+  // devtool : 'source-map',
   mode: "development",
   entry: './src/renderer.js',
   output: {
     filename: 'renderer.js',
     path: path.resolve(__dirname, 'dist'),
+  },
+  cache: {
+    type: 'filesystem',
   },
   module: {
     rules: [
@@ -36,7 +40,7 @@ module.exports = {
           },
           {
             // Loads a SASS/SCSS file and compiles it to CSS
-            loader: 'sass-loader'
+            loader: 'sass-loader',
           }
         ]
       },

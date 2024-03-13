@@ -98,6 +98,7 @@ EXPORT void readSpectrumForever(){
 
 EXPORT void getFpgaInterrupt(char* data){
     DWORD t;
+    // RunningMode_ResetTriggerStatus(TriggerSource::MASK, 0);
     HANDLE device =  CreateFileA(R"(\\.\xillyusb_00_intr)", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_ALWAYS, NULL, NULL);
     ReadFile(device, data, 4, &t,NULL);
 }
